@@ -20,9 +20,27 @@ class SupermercadoController:
                 with open(self.archivo_datos, 'r', encoding='utf-8') as f:
                     datos = json.load(f)
                     
-                self.productos = {p['codigo']: Producto.from_dict(p) for p in datos.get('productos', [])}
+                # Cargar productos (nueva estructura por categorías)
+                productos_data = datos.get('productos', {})
+                if isinstance(productos_data, dict):
+                    # Nueva estructura: por categorías
+                    for categoria, productos in productos_data.items():
+                        for prod_data in productos:
+                            producto = Producto.from_dict(prod_data)
+                            self.productos[producto.codigo] = producto
+                elif isinstance(productos_data, list):
+                    # Estructura antigua: lista simple (compatibilidad)
+                    for prod_data in productos_data:
+                        producto = Producto.from_dict(prod_data)
+                        self.productos[producto.codigo] = producto
+                
+                # Cargar ventas
                 self.ventas = datos.get('ventas', [])
-                self.usuarios = {u['username']: Usuario.from_dict(u) for u in datos.get('usuarios', [])}
+
+                # Cargar usuarios
+                for user_data in datos.get('usuarios', []):
+                    usuario = Usuario.from_dict(user_data)
+                    self.usuarios[usuario.username] = usuario
                 
                 if not self.usuarios:
                     self._crear_usuarios_ejemplo()
@@ -43,10 +61,17 @@ class SupermercadoController:
         self.guardar_datos()
 
     def guardar_datos(self):
-        """Guarda los datos en el archivo JSON"""
+        """Guarda los datos en el archivo JSON organizado por categorías"""
         try:
+            # Organizar productos por categoría
+            productos_por_categoria = {}
+            for producto in self.productos.values():
+                if producto.categoria not in productos_por_categoria:
+                    productos_por_categoria[producto.categoria] = []
+                productos_por_categoria[producto.categoria].append(producto.to_dict())
+            
             datos = {
-                'productos': [p.to_dict() for p in self.productos.values()],
+                'productos': productos_por_categoria,
                 'ventas': self.ventas,
                 'usuarios': [u.to_dict() for u in self.usuarios.values()]
             }
@@ -180,3 +205,27 @@ class SupermercadoController:
             'ingresos_totales': ingresos_totales,
             'valor_inventario': valor_inventario,
         }
+    
+    def eliminar_producto(self, codigo: str) -> bool:
+        """Elimina un producto del inventario"""
+        if codigo not in self.productos:
+            print(f"❌ Producto con código {codigo} no encontrado")
+            return False
+        
+        producto = self.productos[codigo]
+        del self.productos[codigo]
+        self.guardar_datos()
+        print(f"✓ Producto '{producto.nombre}' eliminado exitosamente")
+        return True
+    
+    def reiniciar_productos(self) -> bool:
+        """Reinicia los productos a los valores por defecto, manteniendo ventas y usuarios"""
+        try:
+            self.productos.clear()
+            self._crear_productos_ejemplo()
+            self.guardar_datos()
+            print("✓ Productos reiniciados a valores por defecto")
+            return True
+        except Exception as e:
+            print(f"❌ Error al reiniciar productos: {e}")
+            return False

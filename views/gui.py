@@ -94,6 +94,8 @@ class SupermercadoGUI:
         frame_controles.pack(fill=tk.X, pady=5)
         ttk.Button(frame_controles, text="➕ Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
         ttk.Button(frame_controles, text="🔄 Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="🗑️ Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="♻️ Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
         
         # Búsqueda
         ttk.Label(frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
@@ -510,6 +512,37 @@ class SupermercadoGUI:
         btn_frame.pack(fill=tk.X, pady=20)
         ttk.Button(btn_frame, text="Actualizar", command=actualizar).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Cancelar", command=cancelar).pack(side=tk.LEFT, padx=5)
+    
+    def eliminar_producto(self):
+        """Elimina el producto seleccionado"""
+        selected = self.tree_inv.selection()
+        if not selected:
+            messagebox.showwarning("Aviso", "Seleccione un producto de la lista")
+            return
+            
+        codigo = selected[0]
+        producto = self.controller.productos[codigo]
+        
+        if messagebox.askyesno("Confirmar Eliminación", 
+                              f"¿Está seguro de eliminar el producto '{producto.nombre}'?\n\nEsta acción no se puede deshacer."):
+            if self.controller.eliminar_producto(codigo):
+                messagebox.showinfo("Éxito", f"Producto '{producto.nombre}' eliminado correctamente")
+                self.cargar_inventario_admin()
+            else:
+                messagebox.showerror("Error", "No se pudo eliminar el producto")
+    
+    def reiniciar_productos(self):
+        """Reinicia todos los productos a los valores por defecto"""
+        if messagebox.askyesno("Confirmar Reinicio", 
+                              "¿Está seguro de reiniciar todos los productos a los valores por defecto?\n\n"
+                              "Esto eliminará todos los productos actuales y los reemplazará con los productos de ejemplo.\n"
+                              "Las ventas y usuarios NO se verán afectados.\n\n"
+                              "Esta acción no se puede deshacer."):
+            if self.controller.reiniciar_productos():
+                messagebox.showinfo("Éxito", "Productos reiniciados correctamente")
+                self.cargar_inventario_admin()
+            else:
+                messagebox.showerror("Error", "No se pudo reiniciar los productos")
 
 class LoginWindow:
     def __init__(self, root, controller: SupermercadoController, on_login_success, on_show_registro):
