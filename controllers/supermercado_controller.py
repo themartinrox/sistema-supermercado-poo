@@ -6,80 +6,93 @@ from models import Producto, Venta, Usuario
 class SupermercadoController:
     """Clase que gestiona la lógica del supermercado"""
     
-    def __init__(self, archivo_datos: str = 'supermercado_data.json'):
+    def __init__(self, archivo_productos: str = 'productos.json', 
+                 archivo_ventas: str = 'ventas.json',
+                 archivo_usuarios: str = 'usuarios.json'):
         self.productos: Dict[str, Producto] = {}
         self.ventas: List[dict] = []
         self.usuarios: Dict[str, Usuario] = {}
-        self.archivo_datos = archivo_datos
+        self.archivo_productos = archivo_productos
+        self.archivo_ventas = archivo_ventas
+        self.archivo_usuarios = archivo_usuarios
         self.cargar_datos()
     
     def cargar_datos(self):
-        """Carga los datos desde el archivo JSON"""
-        if os.path.exists(self.archivo_datos):
+        """Carga los datos desde los archivos JSON separados"""
+        # Cargar productos
+        if os.path.exists(self.archivo_productos):
             try:
-                with open(self.archivo_datos, 'r', encoding='utf-8') as f:
-                    datos = json.load(f)
-                    
-                # Cargar productos (nueva estructura por categorías)
-                productos_data = datos.get('productos', {})
-                if isinstance(productos_data, dict):
-                    # Nueva estructura: por categorías
-                    for categoria, productos in productos_data.items():
-                        for prod_data in productos:
-                            producto = Producto.from_dict(prod_data)
-                            self.productos[producto.codigo] = producto
-                elif isinstance(productos_data, list):
-                    # Estructura antigua: lista simple (compatibilidad)
-                    for prod_data in productos_data:
-                        producto = Producto.from_dict(prod_data)
-                        self.productos[producto.codigo] = producto
-                
-                # Cargar ventas
-                self.ventas = datos.get('ventas', [])
-
-                # Cargar usuarios
-                for user_data in datos.get('usuarios', []):
-                    usuario = Usuario.from_dict(user_data)
-                    self.usuarios[usuario.username] = usuario
-                
-                if not self.usuarios:
-                    self._crear_usuarios_ejemplo()
-                    
-                print(f"✓ Datos cargados: {len(self.productos)} productos, {len(self.ventas)} ventas, {len(self.usuarios)} usuarios")
-            except (json.JSONDecodeError, KeyError) as e:
-                print(f"⚠️ Error al cargar o procesar datos: {e}. Se iniciará con datos de ejemplo si es necesario.")
-                self._crear_datos_ejemplo_si_vacio()
+                with open(self.archivo_productos, 'r', encoding='utf-8') as f:
+                    productos_data = json.load(f)
+                self.productos = {p['codigo']: Producto.from_dict(p) for p in productos_data}
+                print(f"✓ Productos cargados: {len(self.productos)}")
+            except Exception as e:
+                print(f"⚠️ Error al cargar productos: {e}")
+                self._crear_productos_ejemplo()
         else:
-            print("⚠️ No se encontró archivo de datos. Iniciando sistema nuevo.")
-            self._crear_datos_ejemplo_si_vacio()
-    
-    def _crear_datos_ejemplo_si_vacio(self):
-        if not self.productos:
+            print("⚠️ No se encontró archivo de productos. Creando productos de ejemplo.")
             self._crear_productos_ejemplo()
-        if not self.usuarios:
+        
+        # Cargar ventas
+        if os.path.exists(self.archivo_ventas):
+            try:
+                with open(self.archivo_ventas, 'r', encoding='utf-8') as f:
+                    self.ventas = json.load(f)
+                print(f"✓ Ventas cargadas: {len(self.ventas)}")
+            except Exception as e:
+                print(f"⚠️ Error al cargar ventas: {e}")
+                self.ventas = []
+        else:
+            print("⚠️ No se encontró archivo de ventas. Iniciando sin ventas.")
+            self.ventas = []
+            self.guardar_ventas()
+        
+        # Cargar usuarios
+        if os.path.exists(self.archivo_usuarios):
+            try:
+                with open(self.archivo_usuarios, 'r', encoding='utf-8') as f:
+                    usuarios_data = json.load(f)
+                self.usuarios = {u['username']: Usuario.from_dict(u) for u in usuarios_data}
+                print(f"✓ Usuarios cargados: {len(self.usuarios)}")
+            except Exception as e:
+                print(f"⚠️ Error al cargar usuarios: {e}")
+                self._crear_usuarios_ejemplo()
+        else:
+            print("⚠️ No se encontró archivo de usuarios. Creando usuario admin.")
             self._crear_usuarios_ejemplo()
-        self.guardar_datos()
-
-    def guardar_datos(self):
-        """Guarda los datos en el archivo JSON organizado por categorías"""
+    
+    def guardar_productos(self):
+        """Guarda solo los productos en productos.json"""
         try:
-            # Organizar productos por categoría
-            productos_por_categoria = {}
-            for producto in self.productos.values():
-                if producto.categoria not in productos_por_categoria:
-                    productos_por_categoria[producto.categoria] = []
-                productos_por_categoria[producto.categoria].append(producto.to_dict())
-            
-            datos = {
-                'productos': productos_por_categoria,
-                'ventas': self.ventas,
-                'usuarios': [u.to_dict() for u in self.usuarios.values()]
-            }
-            with open(self.archivo_datos, 'w', encoding='utf-8') as f:
-                json.dump(datos, f, indent=2, ensure_ascii=False)
-            print("✓ Datos guardados exitosamente")
+            productos_list = [p.to_dict() for p in self.productos.values()]
+            with open(self.archivo_productos, 'w', encoding='utf-8') as f:
+                json.dump(productos_list, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error al guardar datos: {e}")
+            print(f"❌ Error al guardar productos: {e}")
+    
+    def guardar_ventas(self):
+        """Guarda solo las ventas en ventas.json"""
+        try:
+            with open(self.archivo_ventas, 'w', encoding='utf-8') as f:
+                json.dump(self.ventas, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"❌ Error al guardar ventas: {e}")
+    
+    def guardar_usuarios(self):
+        """Guarda solo los usuarios en usuarios.json"""
+        try:
+            usuarios_list = [u.to_dict() for u in self.usuarios.values()]
+            with open(self.archivo_usuarios, 'w', encoding='utf-8') as f:
+                json.dump(usuarios_list, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"❌ Error al guardar usuarios: {e}")
+    
+    def guardar_datos(self):
+        """Guarda todos los datos en sus respectivos archivos"""
+        self.guardar_productos()
+        self.guardar_ventas()
+        self.guardar_usuarios()
+        print("✓ Datos guardados exitosamente")
 
     def _crear_usuarios_ejemplo(self):
         """Crea usuario admin por defecto"""

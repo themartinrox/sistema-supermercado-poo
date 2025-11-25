@@ -9,7 +9,11 @@ class Application:
         self.root.title("Sistema de Supermercado")
         self.root.geometry("400x350")
         
-        self.controller = SupermercadoController()
+        self.controller = SupermercadoController(
+            archivo_productos="productos.json",
+            archivo_ventas="ventas.json",
+            archivo_usuarios="usuarios.json"
+        )
         self.show_login_window()
 
     def show_login_window(self):
