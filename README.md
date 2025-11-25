@@ -8,6 +8,8 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - **Ver inventario completo** organizado por categorías
 - **Agregar nuevos productos** con toda su información
 - **Actualizar stock** (agregar o reducir cantidades)
+- **🗑️ Eliminar productos** del inventario
+- **♻️ Reiniciar productos** a valores por defecto (sin afectar ventas/usuarios)
 - **Buscar productos** por código, nombre o categoría
 - **Alertas automáticas** cuando el stock llega a niveles críticos (≤5 unidades/kilos)
 
@@ -45,15 +47,12 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - Python 3.7 o superior
 
 ### Ejecución
-**Versión con Interfaz Gráfica (Recomendada):**
+**Interfaz Gráfica (Recomendada):**
 ```bash
-python interfaz.py
+python main.py
 ```
 
-**Versión de Consola:**
-```bash
-python supermercado.py
-```
+El sistema cargará automáticamente los 3 archivos JSON (productos, ventas, usuarios) o los creará con datos de ejemplo si no existen.
 
 ## 🖥️ Interfaz Gráfica (Tkinter)
 
@@ -175,10 +174,19 @@ Panel centralizado que muestra:
 
 ## 💾 Almacenamiento de Datos
 
-- Todos los datos se guardan automáticamente en `supermercado_data.json`
-- El archivo se actualiza después de cada operación
-- Los datos persisten entre sesiones
-- **Primera ejecución**: Se crean productos de ejemplo automáticamente
+El sistema utiliza **3 archivos JSON separados** para mejor organización:
+- **`productos.json`**: Inventario de productos
+- **`ventas.json`**: Historial de ventas
+- **`usuarios.json`**: Cuentas de usuarios
+
+Esta separación permite:
+- 🔄 **Reiniciar productos** sin afectar ventas ni usuarios
+- 🗑️ **Eliminar productos** de forma independiente
+- 📊 **Respaldos selectivos** por tipo de datos
+- ⚡ **Mejor rendimiento** al cargar datos específicos
+
+Los datos se guardan automáticamente después de cada operación y persisten entre sesiones.
+**Primera ejecución**: Se crean productos de ejemplo automáticamente.
 
 ## 🎯 Características Destacadas
 
