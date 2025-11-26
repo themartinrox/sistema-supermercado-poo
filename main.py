@@ -10,9 +10,9 @@ class Application:
         self.root.geometry("400x350")
         
         self.controller = SupermercadoController(
-            archivo_productos="productos.json",
-            archivo_ventas="ventas.json",
-            archivo_usuarios="usuarios.json"
+            archivo_productos="data/productos.json",
+            archivo_ventas="data/ventas.json",
+            archivo_usuarios="data/usuarios.json"
         )
         self.show_login_window()
 

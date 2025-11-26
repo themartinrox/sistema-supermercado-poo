@@ -6,9 +6,9 @@ from models import Producto, Venta, Usuario
 class SupermercadoController:
     """Clase que gestiona la lógica del supermercado"""
     
-    def __init__(self, archivo_productos: str = 'productos.json', 
-                 archivo_ventas: str = 'ventas.json',
-                 archivo_usuarios: str = 'usuarios.json'):
+    def __init__(self, archivo_productos: str = 'data/productos.json', 
+                 archivo_ventas: str = 'data/ventas.json',
+                 archivo_usuarios: str = 'data/usuarios.json'):
         self.productos: Dict[str, Producto] = {}
         self.ventas: List[dict] = []
         self.usuarios: Dict[str, Usuario] = {}
