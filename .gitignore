@@ -9,4 +9,4 @@ venv/
 .venv
 .vscode/
 *.log
-supermercado_data.json
+data/*.json
