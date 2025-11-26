@@ -1,14 +1,20 @@
-"""Representa un producto en el inventario del supermercado"""
+"""Representa un producto en el inventario del supermercado.
+
+Returns:
+    class: Clase Producto
+"""
+from .categoria import Categoria
+from .unidad import Unidad
 
 class Producto:
     def __init__(self, codigo: str, nombre: str, precio: float, stock: float, 
-                 categoria: str, unidad: str = "unidades", stock_minimo: float = 5):
+                 categoria: Categoria, unidad: Unidad, stock_minimo: float = 5):
         self.codigo = codigo
         self.nombre = nombre
         self.precio = precio
         self.stock = stock
         self.categoria = categoria
-        self.unidad = unidad  # "unidades" o "kilos"
+        self.unidad = unidad
         self.stock_minimo = stock_minimo
     
     def to_dict(self) -> dict:
@@ -18,20 +24,25 @@ class Producto:
             'nombre': self.nombre,
             'precio': self.precio,
             'stock': self.stock,
-            'categoria': self.categoria,
-            'unidad': self.unidad,
+            'categoria': self.categoria.nombre if isinstance(self.categoria, Categoria) else self.categoria,
+            'unidad': self.unidad.nombre if isinstance(self.unidad, Unidad) else self.unidad,
             'stock_minimo': self.stock_minimo
         }
     
     @staticmethod
     def from_dict(data: dict):
         """Crea un producto desde un diccionario"""
-        unidad = data.get('unidad', 'unidades')
+        unidad_data = data.get('unidad', 'unidades')
+        categoria_data = data.get('categoria', 'General')
         stock = data['stock']
         stock_minimo = data.get('stock_minimo', 5)
         
+        # Convertir a objetos
+        unidad_obj = Unidad.from_dict(unidad_data)
+        categoria_obj = Categoria.from_dict(categoria_data)
+        
         # Validación y corrección de datos corruptos/inválidos desde JSON
-        if unidad == 'unidades':
+        if unidad_obj.nombre == 'unidades':
             # Si es unidades pero tiene decimales, corregir
             if isinstance(stock, float) and not stock.is_integer():
                 print(f"⚠️ Corrección de datos: {data['nombre']} tenía stock decimal ({stock}). Se redondeó a {round(stock)}.")
@@ -45,8 +56,8 @@ class Producto:
             data['nombre'],
             data['precio'],
             stock,
-            data['categoria'],
-            unidad,
+            categoria_obj,
+            unidad_obj,
             stock_minimo
         )
     
@@ -56,4 +67,4 @@ class Producto:
     
     def __str__(self) -> str:
         alerta = " ⚠️ STOCK BAJO" if self.tiene_stock_bajo() else ""
-        return f"{self.codigo} | {self.nombre} | ${self.precio:,.0f} | Stock: {self.stock} {self.unidad}{alerta}"
+        return f"{self.codigo} | {self.nombre} | ${self.precio:,.0f} | Stock: {self.stock} {self.unidad.nombre}{alerta}"

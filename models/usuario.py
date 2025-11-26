@@ -1,4 +1,8 @@
-"""Representa un usuario del sistema"""
+"""Representa un usuario del sistema.
+
+Returns:
+    class: Clase Usuario
+"""
 
 class Usuario:
     def __init__(self, username: str, password: str, role: str = 'comprador'):

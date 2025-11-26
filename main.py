@@ -1,3 +1,9 @@
+"""Punto de entrada principal de la aplicación.
+
+Returns:
+    None: Inicia el bucle principal de la interfaz gráfica.
+"""
+
 import tkinter as tk
 from controllers.supermercado_controller import SupermercadoController
 from views.gui import LoginWindow, SupermercadoGUI, RegistroWindow

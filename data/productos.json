@@ -3,7 +3,7 @@
     "codigo": "001",
     "nombre": "Arroz",
     "precio": 1500,
-    "stock": 125.0,
+    "stock": 124.0,
     "categoria": "Abarrotes",
     "unidad": "kilos",
     "stock_minimo": 10

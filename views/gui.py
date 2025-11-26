@@ -1,3 +1,9 @@
+"""Interfaz gráfica del sistema de supermercado.
+
+Returns:
+    class: Clases de la interfaz gráfica (LoginWindow, SupermercadoGUI, RegistroWindow)
+"""
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 from models import Producto, Usuario
@@ -96,6 +102,7 @@ class SupermercadoGUI:
         ttk.Button(frame_controles, text="🔄 Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
         ttk.Button(frame_controles, text="🗑️ Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
         ttk.Button(frame_controles, text="♻️ Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="👤 Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
         
         # Búsqueda
         ttk.Label(frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
@@ -254,7 +261,7 @@ class SupermercadoGUI:
         if messagebox.askyesno("Confirmar", f"Proceder con la venta por {self.lbl_total['text']}?"):
             venta = self.controller.realizar_venta(items_venta)
             if venta:
-                messagebox.showinfo("Éxito", f"Venta realizada! Total: ${venta.total:,.0f}")
+                messagebox.showinfo("Éxito", f"Venta realizada! ID: {venta.id}\nTotal: ${venta.total:,.0f}")
                 self.limpiar_carrito()
                 self.cargar_productos_venta()
             else:
@@ -290,7 +297,8 @@ class SupermercadoGUI:
         self.txt_log.config(state='normal')
         self.txt_log.delete(1.0, tk.END)
         for venta in reversed(self.controller.ventas[-10:]):
-            self.txt_log.insert(tk.END, f"📅 {venta['fecha']} | Total: ${venta['total']:,.0f} | Items: {len(venta['items'])}\n")
+            id_venta = venta.get('id', 'N/A')
+            self.txt_log.insert(tk.END, f"🆔 {id_venta} | 📅 {venta['fecha']} | Total: ${venta['total']:,.0f} | Items: {len(venta['items'])}\n")
         self.txt_log.config(state='disabled')
 
     # --- Pestaña de Alertas ---
@@ -543,6 +551,63 @@ class SupermercadoGUI:
                 self.cargar_inventario_admin()
             else:
                 messagebox.showerror("Error", "No se pudo reiniciar los productos")
+
+    def mostrar_dialogo_crear_admin(self):
+        """Muestra formulario para crear un nuevo administrador"""
+        # Ocultar la tabla temporalmente
+        self.tree_inv.pack_forget()
+        
+        # Crear frame para el formulario
+        form_frame = ttk.Frame(self.tab_inventario)
+        form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        ttk.Label(form_frame, text="👤 Nuevo Administrador", font=('Helvetica', 14, 'bold')).pack(pady=10)
+        
+        # Campos del formulario
+        campos_frame = ttk.Frame(form_frame)
+        campos_frame.pack(fill=tk.BOTH, expand=True)
+        
+        entries = {}
+        
+        # Usuario
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Usuario:", width=25).pack(side=tk.LEFT)
+        entry_user = ttk.Entry(row_frame)
+        entry_user.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['username'] = entry_user
+        
+        # Contraseña
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Contraseña:", width=25).pack(side=tk.LEFT)
+        entry_pass = ttk.Entry(row_frame, show="*")
+        entry_pass.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['password'] = entry_pass
+        
+        def guardar():
+            username = entries['username'].get().strip()
+            password = entries['password'].get().strip()
+            
+            if not username or not password:
+                messagebox.showwarning("Error", "Todos los campos son obligatorios")
+                return
+
+            if self.controller.registrar_usuario(username, password, 'admin'):
+                messagebox.showinfo("Éxito", f"Administrador '{username}' creado correctamente")
+                cancelar()
+            else:
+                messagebox.showerror("Error", "El nombre de usuario ya existe")
+        
+        def cancelar():
+            form_frame.destroy()
+            self.tree_inv.pack(fill=tk.BOTH, expand=True)
+        
+        # Botones
+        btn_frame = ttk.Frame(form_frame)
+        btn_frame.pack(fill=tk.X, pady=20)
+        ttk.Button(btn_frame, text="Crear Admin", command=guardar).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Cancelar", command=cancelar).pack(side=tk.LEFT, padx=5)
 
 class LoginWindow:
     def __init__(self, root, controller: SupermercadoController, on_login_success, on_show_registro):

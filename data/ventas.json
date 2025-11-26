@@ -1,30 +1,17 @@
 [
   {
-    "fecha": "2025-11-25 09:37:54",
+    "id": 1,
+    "fecha": "2025-11-26 10:07:35",
     "items": [
       {
         "codigo": "001",
         "nombre": "Arroz",
-        "cantidad": 10,
+        "cantidad": 1.0,
         "precio_unitario": 1500,
-        "subtotal": 15000,
+        "subtotal": 1500.0,
         "unidad": "kilos"
       }
     ],
-    "total": 15000
-  },
-  {
-    "fecha": "2025-11-25 09:38:25",
-    "items": [
-      {
-        "codigo": "007",
-        "nombre": "Coca Cola 2L",
-        "cantidad": 4,
-        "precio_unitario": 2000,
-        "subtotal": 8000,
-        "unidad": "unidades"
-      }
-    ],
-    "total": 8000
+    "total": 1500.0
   }
 ]
