@@ -1,11 +1,44 @@
 \documentclass{beamer}
 \usetheme{Madrid}
-\usecolortheme{default}
+\usecolortheme{dolphin}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Configuración de listings para código Python
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle, language=Python}
 
 \title{Sistema de Gestión de Minimarket}
 \subtitle{Proyecto de Programación Orientada a Objetos}
 \author{Martin Rodriguez \and Juan Aguilar \and Ignacio Iturra \and Diego Dominguez}
-\institute{Departamento de Ciencias de La Ingeniería \\ Ingeniería Civil en Informática}
+\institute{Universidad de Los Lagos}
 \date{\today}
 
 \begin{document}
@@ -16,150 +49,201 @@
 \end{frame}
 
 % Índice
-\begin{frame}{Contenidos}
+\begin{frame}{Contenido}
     \tableofcontents
 \end{frame}
 
-% 1. Descripción de la Problemática
-\section{Descripción de la Problemática}
-\begin{frame}{Descripción de la Problemática}
+% Sección 1: Introducción
+\section{Introducción}
+\begin{frame}{Introducción}
     \begin{itemize}
-        \item \textbf{Gestión Manual:} Muchos minimarkets aún dependen de cuadernos o métodos manuales.
-        \item \textbf{Errores de Inventario:} Dificultad para mantener un conteo exacto del stock real vs. registrado.
-        \item \textbf{Lentitud en Ventas:} El cálculo manual de totales ralentiza la atención al cliente.
-        \item \textbf{Falta de Información:} Ausencia de reportes claros sobre ganancias o productos más vendidos.
-        \item \textbf{Pérdidas:} Mermas no detectadas y quiebres de stock inesperados.
+        \item \textbf{Contexto:} Los pequeños negocios (minimarkets) a menudo dependen de procesos manuales para el inventario y las ventas.
+        \item \textbf{Problema:} 
+            \begin{itemize}
+                \item Errores en el cálculo de stock.
+                \item Pérdidas financieras desconocidas.
+                \item Lentitud en la atención al cliente.
+            \end{itemize}
+        \item \textbf{Solución:} Un sistema de escritorio en Python que automatiza la gestión de inventario y ventas, mejorando la eficiencia y el control.
     \end{itemize}
 \end{frame}
 
-% 2. Objetivos
+% Sección 2: Objetivos
 \section{Objetivos}
-\begin{frame}{Objetivos}
-    \textbf{Objetivo General}
-    \vspace{0.5em}
-    
-    Desarrollar un sistema de información de escritorio para la administración de un minimarket, que permita gestionar el inventario y registrar ventas de manera eficiente y segura.
-    
-    \vspace{1em}
-    \textbf{Objetivos Específicos}
+\begin{frame}{Objetivos del Proyecto}
+    \textbf{Objetivo General:}
     \begin{itemize}
-        \item Implementar arquitectura \textbf{MVC} con controladores segregados.
-        \item Diseñar una \textbf{GUI} intuitiva con Tkinter.
-        \item Desarrollar módulos de \textbf{Inventario} (con categorías y unidades) y \textbf{Ventas}.
-        \item Implementar sistema de \textbf{Autenticación} y roles (Admin/Comprador).
-        \item Asegurar persistencia de datos mediante archivos \textbf{JSON}.
-        \item Generar \textbf{IDs únicos} para trazabilidad de ventas.
+        \item Desarrollar un sistema de información para administrar un minimarket, gestionando inventario y ventas de forma eficiente.
+    \end{itemize}
+    
+    \vspace{0.5cm}
+    
+    \textbf{Objetivos Específicos:}
+    \begin{itemize}
+        \item Implementar arquitectura \textbf{MVC} (Modelo-Vista-Controlador).
+        \item Diseñar una \textbf{GUI} funcional con Tkinter.
+        \item Gestionar productos con \textbf{Categorías} y \textbf{Unidades}.
+        \item Implementar persistencia de datos con archivos \textbf{JSON}.
+        \item Generar reportes de ventas con IDs únicos.
     \end{itemize}
 \end{frame}
 
-% 3. Justificación
-\section{Justificación}
-\begin{frame}{Justificación}
-    \begin{block}{¿Por qué este sistema?}
-        \begin{itemize}
-            \item \textbf{Eficiencia Operativa:} Automatiza cálculos y actualizaciones de stock.
-            \item \textbf{Integridad de Datos:} Reduce el error humano en el registro de transacciones.
-            \item \textbf{Toma de Decisiones:} Provee reportes y alertas de stock crítico.
-            \item \textbf{Escalabilidad:} Arquitectura modular (POO/MVC) que facilita futuras mejoras.
-            \item \textbf{Accesibilidad:} Solución de bajo costo y fácil implementación (Python).
-        \end{itemize}
-    \end{block}
-\end{frame}
-
-% 4. Diagramas de Clases
-\section{Diagramas de Clases}
-\begin{frame}{Arquitectura del Sistema (MVC)}
-    \textbf{Estructura Modular:}
-    \vspace{1em}
+% Sección 3: Fundamentación Técnica
+\section{Fundamentación Técnica}
+\begin{frame}{Tecnologías y Patrones}
     \begin{columns}
-        \column{0.33\textwidth}
-        \textbf{Modelos (Data)}
+        \column{0.5\textwidth}
+        \textbf{Tecnologías:}
         \begin{itemize}
-            \item Producto
-            \item Venta
-            \item Usuario
-            \item Categoria
-            \item Unidad
+            \item \textbf{Python 3.14:} Lenguaje principal.
+            \item \textbf{Tkinter:} Interfaz gráfica.
+            \item \textbf{JSON:} Persistencia de datos ligera.
         \end{itemize}
         
-        \column{0.33\textwidth}
-        \textbf{Vistas (GUI)}
+        \column{0.5\textwidth}
+        \textbf{Patrones de Diseño:}
         \begin{itemize}
-            \item SupermercadoGUI
-            \item LoginWindow
-            \item RegistroWindow
-        \end{itemize}
-        
-        \column{0.33\textwidth}
-        \textbf{Controladores (Logic)}
-        \begin{itemize}
-            \item ProductoController
-            \item VentaController
-            \item UsuarioController
-            \item SupermercadoController (Fachada)
+            \item \textbf{MVC:} Separación de lógica (Controlador), datos (Modelo) e interfaz (Vista).
+            \item \textbf{Facade:} \texttt{SupermercadoController} unifica el acceso a los sub-controladores.
+            \item \textbf{POO:} Uso de Clases, Herencia y Composición.
         \end{itemize}
     \end{columns}
+\end{frame}
+
+% Sección 4: Arquitectura
+\section{Arquitectura del Sistema}
+\begin{frame}{Diagrama de Clases}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/diagrama_clases.png}
+        \caption{Estructura de Clases del Sistema (MVC)}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Estructura del Proyecto}
+    La estructura de carpetas refleja la arquitectura MVC:
+    \vspace{0.5cm}
+    \begin{itemize}
+        \item \texttt{models/}: Definición de objetos (\texttt{Producto}, \texttt{Venta}, \texttt{Usuario}).
+        \item \texttt{views/}: Interfaz gráfica (\texttt{SupermercadoGUI}).
+        \item \texttt{controllers/}: Lógica de negocio (\texttt{VentaController}, \texttt{ProductoController}).
+        \item \texttt{data/}: Archivos de persistencia (\texttt{.json}).
+    \end{itemize}
+\end{frame}
+
+% Sección 5: Implementación (Código)
+\section{Implementación y Algoritmos}
+
+\begin{frame}[fragile]{Modelo: Producto (Composición)}
+    Uso de composición para \texttt{Categoria} y \texttt{Unidad}.
+    \begin{lstlisting}
+class Producto:
+    def __init__(self, codigo, nombre, precio, stock, 
+                 categoria: Categoria, unidad: Unidad, ...):
+        self.codigo = codigo
+        self.nombre = nombre
+        self.precio = precio
+        self.stock = stock
+        self.categoria = categoria # Objeto Categoria
+        self.unidad = unidad       # Objeto Unidad
     
-    \vspace{1em}
-    \textit{* Se recomienda insertar aquí la imagen del Diagrama de Clases UML generado.}
+    def to_dict(self) -> dict:
+        return {
+            'codigo': self.codigo,
+            # ...
+            'categoria': self.categoria.nombre,
+            'unidad': self.unidad.nombre
+        }
+    \end{lstlisting}
 \end{frame}
 
-% 5. Listado de Funcionalidades
-\section{Funcionalidades}
-\begin{frame}{Listado de Funcionalidades (1/2)}
+\begin{frame}[fragile]{Controlador: Generación de IDs}
+    Algoritmo para generar IDs autoincrementales en \texttt{VentaController}.
+    \begin{lstlisting}
+def obtener_siguiente_id(self) -> int:
+    """Calcula el siguiente ID basado en el historial."""
+    if not self.ventas:
+        return 1
+    max_id = 0
+    for v in self.ventas:
+        v_id = v.get('id')
+        if isinstance(v_id, int) and v_id > max_id:
+            max_id = v_id
+    return max_id + 1
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Controlador: Realizar Venta}
+    Lógica transaccional: Crear venta, descontar stock y guardar.
+    \begin{lstlisting}
+def realizar_venta(self, items: List[tuple]) -> Optional[Venta]:
+    nuevo_id = self.obtener_siguiente_id()
+    venta = Venta(id_venta=nuevo_id)
+    
+    for codigo, cantidad in items:
+        producto = self.producto_controller.productos[codigo]
+        venta.agregar_item(producto, cantidad)
+        # Actualizacion de stock en tiempo real
+        self.producto_controller.actualizar_stock(
+            codigo, cantidad, 'restar'
+        )
+    
+    self.ventas.append(venta.to_dict())
+    self.guardar_ventas()
+    return venta
+    \end{lstlisting}
+\end{frame}
+
+% Sección 6: Funcionalidades
+\section{Funcionalidades Clave}
+\begin{frame}{Funcionalidades del Sistema}
     \begin{enumerate}
-        \item \textbf{Autenticación y Roles:}
-        \begin{itemize}
-            \item Login seguro para Administradores y Compradores.
-            \item Creación de nuevos administradores (solo por admins).
-        \end{itemize}
-        
-        \item \textbf{Gestión de Inventario:}
-        \begin{itemize}
-            \item CRUD completo de productos.
-            \item Soporte para Categorías y Unidades (Kilos/Unidades).
-            \item Búsqueda en tiempo real.
-        \end{itemize}
-        
-        \item \textbf{Control de Stock:}
-        \begin{itemize}
-            \item Actualización de stock (Agregar/Restar).
-            \item Alertas automáticas de stock bajo.
-        \end{itemize}
+        \item \textbf{Control de Acceso:} Login con roles (Admin/Vendedor).
+        \item \textbf{Gestión de Inventario:} 
+            \begin{itemize}
+                \item CRUD de Productos.
+                \item Alertas de stock bajo.
+            \end{itemize}
+        \item \textbf{Punto de Venta (POS):}
+            \begin{itemize}
+                \item Búsqueda rápida de productos.
+                \item Cálculo automático de totales.
+                \item Generación de boleta (ID único).
+            \end{itemize}
+        \item \textbf{Administración:}
+            \begin{itemize}
+                \item Creación de nuevos administradores.
+                \item Reportes de ventas detallados.
+            \end{itemize}
     \end{enumerate}
 \end{frame}
 
-\begin{frame}{Listado de Funcionalidades (2/2)}
-    \begin{enumerate}
-        \setcounter{enumi}{3}
-        \item \textbf{Sistema de Ventas:}
-        \begin{itemize}
-            \item Carrito de compras interactivo.
-            \item Validación de stock disponible antes de la venta.
-            \item Generación de ID único por venta (Boleta).
-        \end{itemize}
-        
-        \item \textbf{Reportes y Estadísticas:}
-        \begin{itemize}
-            \item Historial de últimas ventas con detalle.
-            \item Resumen financiero (Ingresos, Valor Inventario).
-        \end{itemize}
-        
-        \item \textbf{Persistencia y Seguridad:}
-        \begin{itemize}
-            \item Guardado automático en JSON separados.
-            \item Opción de reinicio de fábrica (solo productos).
-        \end{itemize}
-    \end{enumerate}
+% Sección 7: Conclusión
+\section{Conclusión}
+\begin{frame}{Conclusiones y Trabajo Futuro}
+    \textbf{Conclusiones:}
+    \begin{itemize}
+        \item Se logró un sistema robusto y modular gracias a MVC.
+        \item La separación de controladores facilita el mantenimiento.
+        \item La interfaz gráfica es intuitiva para el usuario final.
+    \end{itemize}
+    
+    \vspace{0.5cm}
+    
+    \textbf{Trabajo Futuro:}
+    \begin{itemize}
+        \item Migración de JSON a Base de Datos SQL (SQLite/PostgreSQL).
+        \item Implementación de reportes gráficos (matplotlib).
+        \item Soporte para lector de código de barras.
+    \end{itemize}
 \end{frame}
 
-% Conclusión / Cierre
 \begin{frame}
     \centering
-    \Huge \textbf{¡Gracias por su atención!}
+    \Huge \textbf{¡Muchas Gracias!}
     
     \vspace{1cm}
-    \Large ¿Preguntas?
+    \large ¿Preguntas?
 \end{frame}
 
 \end{document}

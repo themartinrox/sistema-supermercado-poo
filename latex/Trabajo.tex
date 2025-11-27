@@ -50,7 +50,6 @@
 
 \tableofcontents
 \listoffigures
-\listoftables
 \renewcommand{\lstlistlistingname}{Índice de algoritmos}
 \lstlistoflistings
 
@@ -123,6 +122,16 @@ El proyecto está organizado en paquetes que reflejan la arquitectura MVC, con u
     \item \texttt{controllers/}: Contiene la lógica de control modularizada (\texttt{ProductoController}, \texttt{UsuarioController}, \texttt{VentaController}) y una fachada (\texttt{SupermercadoController}).
     \item \texttt{data/}: Almacena los archivos JSON (\texttt{productos.json}, \texttt{ventas.json}, \texttt{usuarios.json}).
 \end{itemize}
+
+\section{Diagrama de Clases}
+A continuación se presenta el diagrama de clases del sistema, detallando las relaciones entre los modelos, controladores y vistas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrama_clases.png}
+    \caption{Diagrama de Clases del Sistema}
+    \label{fig:diagrama_clases}
+\end{figure}
 
 \section{Implementación de Modelos}
 La clase \texttt{Producto} ha sido refactorizada para utilizar composición con las clases \texttt{Categoria} y \texttt{Unidad}, mejorando la estructura de datos.
