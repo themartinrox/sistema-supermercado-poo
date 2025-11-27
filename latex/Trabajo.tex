@@ -1,0 +1,198 @@
+\documentclass[letter,12pt]{report}
+\input{Macros}
+\def\TITULO{Sistema de Gestión de Minimarket}
+\def\subtitulo{Proyecto de Programación Orientada a Objetos}
+\def\autora{Martin Rodriguez}
+\def\correoa{martin.rodriguez@alumnos.ulagos.cl}
+\def\autorb{Juan Aguilar}
+\def\correob{juan.aguilar@alumnos.ulagos.cl}
+\def\autorc{Ignacio Iturra}
+\def\correoc{ignacio.iturra@alumnos.ulagos.cl}
+\def\autord{Diego Dominguez}
+\def\correod{diego.dominguez@alumnos.ulagos.cl}
+\def\asignatura{Programación Orientada a Objetos}
+\def\campus{Campus Osorno}
+\def\carrera{Ingeniería Civil en Informática}
+\lstset{language=Python}
+
+
+\begin{document}
+
+%%%%%%%%%%%PORTADA%%%%%%%%%%%%%%%%%%%%%
+\setlength{\unitlength}{1 cm} %Especificar unidad de trabajo
+\thispagestyle{empty}
+
+\AddToShipoutPicture*{\BackgroundPic}
+{\color{white}
+   \title{\vspace{2cm}\huge{\MakeUppercase{\textbf{\TITULO}}}\\
+\upshape \large{\textit{\MakeUppercase{\subtitulo}}}\\ \vspace{1cm}
+  \Large \MakeUppercase{Departamento de Ciencias de La Ingeniería}\\
+  \Large \MakeUppercase{\carrera}\\
+   \Large \MakeUppercase{\asignatura}\\
+    \large \MakeUppercase{\campus, Chile}}
+   \author{
+    \parbox{\linewidth}{\hspace{68mm}\raggedright
+     \href{mailto:\correoa}{\autora}\\
+     \hspace{68mm}\raggedright\href{mailto:\correob}{\autorb}\\
+     \hspace{68mm}\raggedright\href{mailto:\correoc}{\autorc}
+     \\
+     \hspace{68mm}\raggedright\href{mailto:\correod}{\autord}
+    }
+  }
+   \date{\vspace{5cm}\hspace{7cm}\raggedright\today}
+   \maketitle
+   \ClearShipoutPicture
+   }
+
+\cleardoublepage
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\renewcommand{\lstlistlistingname}{Índice de algoritmos}
+\lstlistoflistings
+
+%%%%%%%%%%%%%FIN PORTADA%%%%%%%%%%%%%%%%
+
+%%%%%%%RESUMEN%%%%%%%%%%%
+\begin{abstract}\thispagestyle{empty}
+El presente proyecto consiste en el desarrollo de un sistema de software de escritorio para la gestión de un minimarket. El objetivo principal es optimizar los procesos de administración de inventario y registro de ventas, reemplazando métodos manuales propensos a errores.
+
+El sistema ha sido desarrollado utilizando el lenguaje de programación Python y la librería Tkinter para la interfaz gráfica de usuario (GUI). Se ha implementado siguiendo el patrón de arquitectura de software Modelo-Vista-Controlador (MVC), con una estructura modular que separa los controladores por dominio (\texttt{ProductoController}, \texttt{VentaController}, \texttt{UsuarioController}). Para la persistencia de datos, se utilizan tres archivos JSON independientes (\texttt{productos.json}, \texttt{ventas.json}, \texttt{usuarios.json}) almacenados en una carpeta dedicada, permitiendo una gestión organizada y segura de la información.
+
+Las principales funcionalidades incluyen autenticación de usuarios con roles diferenciados (administrador y comprador), gestión avanzada de inventario con categorías y unidades de medida, registro de ventas con generación automática de IDs únicos, y un panel de administración que permite la creación de nuevos administradores y la visualización de reportes detallados.
+
+\keywords{Python, Tkinter, MVC, Gestión de Inventario, POO, JSON}
+\end{abstract}
+
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+%%%%%%%%COMIENZO
+
+\chapter{Introducción}
+La gestión eficiente de un negocio minorista, como un minimarket, requiere herramientas que permitan un control preciso sobre el inventario y las ventas. Muchos pequeños negocios aún dependen de registros manuales, lo que conlleva a errores en el cálculo de stock, pérdidas financieras y una atención al cliente más lenta.
+
+Este proyecto propone una solución tecnológica accesible y funcional: un sistema de escritorio desarrollado en Python que automatiza estas tareas críticas. A través de una interfaz intuitiva, los empleados pueden registrar ventas rápidamente, mientras que los administradores tienen herramientas para gestionar el inventario y supervisar el rendimiento del negocio.
+
+\section{Objetivos}
+
+\subsection{Objetivo General}
+Desarrollar un sistema de información de escritorio para la administración de un minimarket, que permita gestionar el inventario y registrar ventas de manera eficiente y segura.
+
+\subsection{Objetivos Específicos}
+\begin{enumerate}
+    \item Implementar una arquitectura de software basada en el patrón Modelo-Vista-Controlador (MVC) con controladores segregados para asegurar la alta cohesión y bajo acoplamiento.
+    \item Diseñar una interfaz gráfica de usuario (GUI) moderna y funcional utilizando la librería Tkinter, con soporte para múltiples vistas y roles.
+    \item Desarrollar módulos especializados para la gestión de productos (con categorías y unidades), usuarios y ventas.
+    \item Implementar un sistema de autenticación robusto que permita la creación de nuevos administradores y restrinja el acceso a funcionalidades críticas.
+    \item Utilizar archivos JSON separados para la persistencia organizada de datos de inventario, ventas y usuarios.
+    \item Implementar un sistema de generación de IDs únicos para el seguimiento y reporte de ventas.
+\end{enumerate}
+
+\chapter{Fundamentación Teórica}
+
+\section{Programación Orientada a Objetos (POO)}
+El proyecto se fundamenta en el paradigma de Programación Orientada a Objetos. Este paradigma permite modelar entidades del mundo real como "objetos" que poseen atributos (datos) y métodos (comportamiento). En nuestro sistema, entidades como \texttt{Producto}, \texttt{Venta} y \texttt{Usuario} son representadas mediante clases.
+
+\section{Patrón Modelo-Vista-Controlador (MVC)}
+El patrón MVC se utiliza para separar la lógica de la aplicación en tres componentes interconectados:
+\begin{itemize}
+    \item \textbf{Modelo:} Gestiona los datos y la lógica de negocio. En este proyecto, incluye las clases que manipulan los archivos JSON y las estructuras de datos.
+    \item \textbf{Vista:} Es la interfaz de usuario. Muestra la información al usuario y captura sus acciones.
+    \item \textbf{Controlador:} Actúa como intermediario. Recibe las entradas de la vista, las procesa utilizando el modelo y actualiza la vista en consecuencia.
+\end{itemize}
+
+\section{Tecnologías Utilizadas}
+\begin{itemize}
+    \item \textbf{Python:} Lenguaje de programación de alto nivel, interpretado y multiparadigma.
+    \item \textbf{Tkinter:} Biblioteca estándar de Python para la creación de interfaces gráficas de usuario.
+    \item \textbf{JSON (JavaScript Object Notation):} Formato ligero de intercambio de datos, utilizado aquí para la persistencia de la información.
+\end{itemize}
+
+\chapter{Desarrollo del Proyecto}
+
+\section{Estructura del Proyecto}
+El proyecto está organizado en paquetes que reflejan la arquitectura MVC, con una clara separación de responsabilidades:
+\begin{itemize}
+    \item \texttt{models/}: Contiene las clases de datos (\texttt{Producto}, \texttt{Usuario}, \texttt{Venta}, \texttt{Categoria}, \texttt{Unidad}).
+    \item \texttt{views/}: Contiene las clases de la interfaz gráfica (\texttt{SupermercadoGUI}, \texttt{LoginWindow}, \texttt{RegistroWindow}).
+    \item \texttt{controllers/}: Contiene la lógica de control modularizada (\texttt{ProductoController}, \texttt{UsuarioController}, \texttt{VentaController}) y una fachada (\texttt{SupermercadoController}).
+    \item \texttt{data/}: Almacena los archivos JSON (\texttt{productos.json}, \texttt{ventas.json}, \texttt{usuarios.json}).
+\end{itemize}
+
+\section{Implementación de Modelos}
+La clase \texttt{Producto} ha sido refactorizada para utilizar composición con las clases \texttt{Categoria} y \texttt{Unidad}, mejorando la estructura de datos.
+
+\begin{lstlisting}[caption=Clase Producto (models/producto.py), label=code:producto]
+class Producto:
+    def __init__(self, codigo: str, nombre: str, precio: float, stock: float, 
+                 categoria: Categoria, unidad: Unidad, stock_minimo: float = 5):
+        self.codigo = codigo
+        self.nombre = nombre
+        self.precio = precio
+        self.stock = stock
+        self.categoria = categoria
+        self.unidad = unidad
+        self.stock_minimo = stock_minimo
+    
+    def to_dict(self) -> dict:
+        return {
+            'codigo': self.codigo,
+            'nombre': self.nombre,
+            'precio': self.precio,
+            'stock': self.stock,
+            'categoria': self.categoria.nombre,
+            'unidad': self.unidad.nombre,
+            'stock_minimo': self.stock_minimo
+        }
+\end{lstlisting}
+
+\section{Lógica de Control}
+El \texttt{VentaController} maneja la lógica para realizar una venta, incluyendo la generación automática de IDs únicos y la validación de stock.
+
+\begin{lstlisting}[caption=Controlador de Ventas (controllers/venta\_controller.py), label=code:ventascontroller]
+class VentaController:
+    def obtener_siguiente_id(self) -> int:
+        """Calcula el siguiente ID de venta basado en el historial."""
+        if not self.ventas:
+            return 1
+        max_id = 0
+        for v in self.ventas:
+            v_id = v.get('id')
+            if isinstance(v_id, int) and v_id > max_id:
+                max_id = v_id
+        return max_id + 1
+
+    def realizar_venta(self, items: List[tuple]) -> Optional[Venta]:
+        nuevo_id = self.obtener_siguiente_id()
+        venta = Venta(id_venta=nuevo_id)
+        
+        # Validar stock y procesar
+        for codigo, cantidad in items:
+            producto = self.producto_controller.productos[codigo]
+            venta.agregar_item(producto, cantidad)
+            self.producto_controller.actualizar_stock(codigo, cantidad, 'restar')
+        
+        self.ventas.append(venta.to_dict())
+        self.guardar_ventas()
+        return venta
+\end{lstlisting}
+
+\section{Interfaz Gráfica}
+La interfaz gráfica, implementada en \texttt{SupermercadoGUI}, utiliza un diseño de pestañas (\texttt{ttk.Notebook}) para organizar las funcionalidades. Se ha añadido una funcionalidad exclusiva para administradores que permite crear nuevas cuentas de administrador directamente desde la interfaz, así como visualizar reportes de ventas que incluyen el ID único de cada transacción.
+
+\chapter{Conclusión}
+El desarrollo del Sistema de Gestión de Minimarket ha permitido aplicar de manera práctica los conceptos de Programación Orientada a Objetos y el patrón de diseño MVC. El resultado es una aplicación funcional, modular y escalable que resuelve una problemática real de los pequeños negocios.
+
+La implementación de funcionalidades como el control de stock en tiempo real y el historial de ventas proporciona valor inmediato al usuario final. Además, el uso de archivos JSON para la persistencia de datos ofrece una solución sencilla y efectiva para el almacenamiento de información sin la complejidad de un motor de base de datos completo, adecuado para la escala del proyecto.
+
+Como trabajo futuro, se podría considerar la migración a una base de datos SQL (como SQLite) para mejorar la integridad de los datos y la implementación de reportes estadísticos más avanzados.
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliografia.bib}
+
+\end{document}

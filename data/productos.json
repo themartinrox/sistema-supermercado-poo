@@ -3,7 +3,7 @@
     "codigo": "001",
     "nombre": "Arroz",
     "precio": 1500,
-    "stock": 124.0,
+    "stock": 7.0,
     "categoria": "Abarrotes",
     "unidad": "kilos",
     "stock_minimo": 10
@@ -30,7 +30,7 @@
     "codigo": "004",
     "nombre": "Manzanas",
     "precio": 2500,
-    "stock": 104,
+    "stock": 102.9,
     "categoria": "Frutas",
     "unidad": "kilos",
     "stock_minimo": 5
@@ -48,7 +48,7 @@
     "codigo": "006",
     "nombre": "Carne Molida",
     "precio": 4500,
-    "stock": 5.0,
+    "stock": 4.0,
     "categoria": "Carnes",
     "unidad": "kilos",
     "stock_minimo": 5

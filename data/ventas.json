@@ -13,5 +13,51 @@
       }
     ],
     "total": 1500.0
+  },
+  {
+    "id": 2,
+    "fecha": "2025-11-27 11:18:31",
+    "items": [
+      {
+        "codigo": "001",
+        "nombre": "Arroz",
+        "cantidad": 2.0,
+        "precio_unitario": 1500,
+        "subtotal": 3000.0,
+        "unidad": "kilos"
+      }
+    ],
+    "total": 3000.0
+  },
+  {
+    "id": 3,
+    "fecha": "2025-11-27 11:22:41",
+    "items": [
+      {
+        "codigo": "001",
+        "nombre": "Arroz",
+        "cantidad": 1.0,
+        "precio_unitario": 1500,
+        "subtotal": 1500.0,
+        "unidad": "kilos"
+      },
+      {
+        "codigo": "004",
+        "nombre": "Manzanas",
+        "cantidad": 1.1,
+        "precio_unitario": 2500,
+        "subtotal": 2750.0,
+        "unidad": "kilos"
+      },
+      {
+        "codigo": "006",
+        "nombre": "Carne Molida",
+        "cantidad": 1.0,
+        "precio_unitario": 4500,
+        "subtotal": 4500.0,
+        "unidad": "kilos"
+      }
+    ],
+    "total": 8750.0
   }
 ]

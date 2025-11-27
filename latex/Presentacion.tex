@@ -1,0 +1,165 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\title{Sistema de Gestión de Minimarket}
+\subtitle{Proyecto de Programación Orientada a Objetos}
+\author{Martin Rodriguez \and Juan Aguilar \and Ignacio Iturra \and Diego Dominguez}
+\institute{Departamento de Ciencias de La Ingeniería \\ Ingeniería Civil en Informática}
+\date{\today}
+
+\begin{document}
+
+% Diapositiva de Título
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Índice
+\begin{frame}{Contenidos}
+    \tableofcontents
+\end{frame}
+
+% 1. Descripción de la Problemática
+\section{Descripción de la Problemática}
+\begin{frame}{Descripción de la Problemática}
+    \begin{itemize}
+        \item \textbf{Gestión Manual:} Muchos minimarkets aún dependen de cuadernos o métodos manuales.
+        \item \textbf{Errores de Inventario:} Dificultad para mantener un conteo exacto del stock real vs. registrado.
+        \item \textbf{Lentitud en Ventas:} El cálculo manual de totales ralentiza la atención al cliente.
+        \item \textbf{Falta de Información:} Ausencia de reportes claros sobre ganancias o productos más vendidos.
+        \item \textbf{Pérdidas:} Mermas no detectadas y quiebres de stock inesperados.
+    \end{itemize}
+\end{frame}
+
+% 2. Objetivos
+\section{Objetivos}
+\begin{frame}{Objetivos}
+    \textbf{Objetivo General}
+    \vspace{0.5em}
+    
+    Desarrollar un sistema de información de escritorio para la administración de un minimarket, que permita gestionar el inventario y registrar ventas de manera eficiente y segura.
+    
+    \vspace{1em}
+    \textbf{Objetivos Específicos}
+    \begin{itemize}
+        \item Implementar arquitectura \textbf{MVC} con controladores segregados.
+        \item Diseñar una \textbf{GUI} intuitiva con Tkinter.
+        \item Desarrollar módulos de \textbf{Inventario} (con categorías y unidades) y \textbf{Ventas}.
+        \item Implementar sistema de \textbf{Autenticación} y roles (Admin/Comprador).
+        \item Asegurar persistencia de datos mediante archivos \textbf{JSON}.
+        \item Generar \textbf{IDs únicos} para trazabilidad de ventas.
+    \end{itemize}
+\end{frame}
+
+% 3. Justificación
+\section{Justificación}
+\begin{frame}{Justificación}
+    \begin{block}{¿Por qué este sistema?}
+        \begin{itemize}
+            \item \textbf{Eficiencia Operativa:} Automatiza cálculos y actualizaciones de stock.
+            \item \textbf{Integridad de Datos:} Reduce el error humano en el registro de transacciones.
+            \item \textbf{Toma de Decisiones:} Provee reportes y alertas de stock crítico.
+            \item \textbf{Escalabilidad:} Arquitectura modular (POO/MVC) que facilita futuras mejoras.
+            \item \textbf{Accesibilidad:} Solución de bajo costo y fácil implementación (Python).
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+% 4. Diagramas de Clases
+\section{Diagramas de Clases}
+\begin{frame}{Arquitectura del Sistema (MVC)}
+    \textbf{Estructura Modular:}
+    \vspace{1em}
+    \begin{columns}
+        \column{0.33\textwidth}
+        \textbf{Modelos (Data)}
+        \begin{itemize}
+            \item Producto
+            \item Venta
+            \item Usuario
+            \item Categoria
+            \item Unidad
+        \end{itemize}
+        
+        \column{0.33\textwidth}
+        \textbf{Vistas (GUI)}
+        \begin{itemize}
+            \item SupermercadoGUI
+            \item LoginWindow
+            \item RegistroWindow
+        \end{itemize}
+        
+        \column{0.33\textwidth}
+        \textbf{Controladores (Logic)}
+        \begin{itemize}
+            \item ProductoController
+            \item VentaController
+            \item UsuarioController
+            \item SupermercadoController (Fachada)
+        \end{itemize}
+    \end{columns}
+    
+    \vspace{1em}
+    \textit{* Se recomienda insertar aquí la imagen del Diagrama de Clases UML generado.}
+\end{frame}
+
+% 5. Listado de Funcionalidades
+\section{Funcionalidades}
+\begin{frame}{Listado de Funcionalidades (1/2)}
+    \begin{enumerate}
+        \item \textbf{Autenticación y Roles:}
+        \begin{itemize}
+            \item Login seguro para Administradores y Compradores.
+            \item Creación de nuevos administradores (solo por admins).
+        \end{itemize}
+        
+        \item \textbf{Gestión de Inventario:}
+        \begin{itemize}
+            \item CRUD completo de productos.
+            \item Soporte para Categorías y Unidades (Kilos/Unidades).
+            \item Búsqueda en tiempo real.
+        \end{itemize}
+        
+        \item \textbf{Control de Stock:}
+        \begin{itemize}
+            \item Actualización de stock (Agregar/Restar).
+            \item Alertas automáticas de stock bajo.
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Listado de Funcionalidades (2/2)}
+    \begin{enumerate}
+        \setcounter{enumi}{3}
+        \item \textbf{Sistema de Ventas:}
+        \begin{itemize}
+            \item Carrito de compras interactivo.
+            \item Validación de stock disponible antes de la venta.
+            \item Generación de ID único por venta (Boleta).
+        \end{itemize}
+        
+        \item \textbf{Reportes y Estadísticas:}
+        \begin{itemize}
+            \item Historial de últimas ventas con detalle.
+            \item Resumen financiero (Ingresos, Valor Inventario).
+        \end{itemize}
+        
+        \item \textbf{Persistencia y Seguridad:}
+        \begin{itemize}
+            \item Guardado automático en JSON separados.
+            \item Opción de reinicio de fábrica (solo productos).
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+% Conclusión / Cierre
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias por su atención!}
+    
+    \vspace{1cm}
+    \Large ¿Preguntas?
+\end{frame}
+
+\end{document}
