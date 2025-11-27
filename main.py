@@ -1,7 +1,7 @@
 """Punto de entrada principal de la aplicación.
 
 Returns:
-    None: Inicia el bucle principal de la interfaz gráfica.
+     Inicia el bucle principal de la interfaz gráfica.
 """
 
 import tkinter as tk
