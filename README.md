@@ -20,6 +20,7 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - **Resumen de venta** antes de confirmar
 - **Actualización automática** del inventario tras cada venta
 - **Registro histórico** de todas las ventas realizadas
+- **Generación de Boleta** con ID único de venta
 
 ### 📊 Reportes y Estadísticas
 - Total de productos en catálogo
@@ -45,6 +46,7 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 
 ### Requisitos
 - Python 3.7 o superior
+- Librería `tkinter` (incluida en la instalación estándar de Python)
 
 ### Ejecución
 **Interfaz Gráfica (Recomendada):**
@@ -52,7 +54,7 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 python main.py
 ```
 
-El sistema cargará automáticamente los 3 archivos JSON (productos, ventas, usuarios) o los creará con datos de ejemplo si no existen.
+El sistema cargará automáticamente los 3 archivos JSON (productos, ventas, usuarios) desde la carpeta `data/` o los creará con datos de ejemplo si no existen.
 
 ## 🖥️ Interfaz Gráfica (Tkinter)
 
@@ -61,6 +63,7 @@ El proyecto incluye una interfaz gráfica moderna y fácil de usar:
 - **Tablas Interactivas**: Visualización clara de datos.
 - **Formularios**: Ventanas emergentes para agregar productos y stock.
 - **Búsqueda en Tiempo Real**: Filtra productos mientras escribes.
+- **Gestión de Administradores**: Funcionalidad exclusiva para crear nuevos administradores.
 
 ## ☁️ Subir a GitHub
 
@@ -92,12 +95,12 @@ El sistema cuenta con control de acceso por roles:
 - **Contraseña:** `admin123`
 
 ### Roles de Usuario
-1. **Administrador:** Acceso total (Inventario, Ventas, Reportes, Alertas).
+1. **Administrador:** Acceso total (Inventario, Ventas, Reportes, Alertas, Crear Admins).
 2. **Comprador:** Acceso limitado (Catálogo de productos y Compras).
 
 ### Registro de Nuevos Usuarios
 - Desde la pantalla de inicio de sesión, puedes crear nuevas cuentas de **Comprador**.
-- Las cuentas de administrador deben crearse manualmente o por otro administrador (futura mejora).
+- Las cuentas de **Administrador** pueden crearse desde el panel de administración (requiere estar logueado como admin).
 
 ## 📖 Manual de Uso
 
@@ -174,10 +177,10 @@ Panel centralizado que muestra:
 
 ## 💾 Almacenamiento de Datos
 
-El sistema utiliza **3 archivos JSON separados** para mejor organización:
-- **`productos.json`**: Inventario de productos
-- **`ventas.json`**: Historial de ventas
-- **`usuarios.json`**: Cuentas de usuarios
+El sistema utiliza **3 archivos JSON separados** en la carpeta `data/` para mejor organización:
+- **`data/productos.json`**: Inventario de productos
+- **`data/ventas.json`**: Historial de ventas
+- **`data/usuarios.json`**: Cuentas de usuarios
 
 Esta separación permite:
 - 🔄 **Reiniciar productos** sin afectar ventas ni usuarios
@@ -230,6 +233,7 @@ Los datos se guardan automáticamente después de cada operación y persisten en
 ### Venta
 ```python
 {
+    "id": 1,
     "fecha": "2025-11-24 10:30:00",
     "items": [
         {
@@ -257,13 +261,13 @@ Producto("código", "nombre", precio, stock, "categoría", "unidad", stock_minim
 Las categorías se crean automáticamente al agregar productos.
 
 ### Modificar Productos de Ejemplo
-Edita el método `_crear_productos_ejemplo()` en la clase `Supermercado`.
+Edita el método `_crear_productos_ejemplo()` en la clase `ProductoController`.
 
 ## 🐛 Solución de Problemas
 
 **Error al cargar datos:**
-- Verifica que `supermercado_data.json` no esté corrupto
-- Elimina el archivo para reiniciar con datos frescos
+- Verifica que los archivos en `data/` no estén corruptos
+- Elimina los archivos para reiniciar con datos frescos
 
 **Productos duplicados:**
 - Cada producto debe tener un código único
@@ -274,7 +278,6 @@ Edita el método `_crear_productos_ejemplo()` en la clase `Supermercado`.
 
 ## 📈 Mejoras Futuras Sugeridas
 
-- [ ] Sistema de usuarios y permisos
 - [ ] Exportación de reportes a PDF/Excel
 - [ ] Gráficos de ventas e inventario
 - [ ] Sistema de proveedores
@@ -283,7 +286,6 @@ Edita el método `_crear_productos_ejemplo()` en la clase `Supermercado`.
 - [ ] Descuentos y promociones
 - [ ] Control de vencimientos
 - [ ] Base de datos SQL
-- [ ] Interfaz gráfica (GUI)
 
 ## 📄 Licencia
 
@@ -295,6 +297,6 @@ Sistema desarrollado para administración de supermercados.
 
 ---
 
-**Versión:** 1.0  
+**Versión:** 2.0  
 **Fecha:** Noviembre 2025  
-**Python:** 3.7+
+**Python:** 3.14
