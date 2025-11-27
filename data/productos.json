@@ -3,7 +3,7 @@
     "codigo": "001",
     "nombre": "Arroz",
     "precio": 1500,
-    "stock": 7.0,
+    "stock": 50,
     "categoria": "Abarrotes",
     "unidad": "kilos",
     "stock_minimo": 10
@@ -12,7 +12,7 @@
     "codigo": "002",
     "nombre": "Leche",
     "precio": 1200,
-    "stock": 69,
+    "stock": 30,
     "categoria": "Lácteos",
     "unidad": "unidades",
     "stock_minimo": 5
@@ -30,7 +30,7 @@
     "codigo": "004",
     "nombre": "Manzanas",
     "precio": 2500,
-    "stock": 102.9,
+    "stock": 4,
     "categoria": "Frutas",
     "unidad": "kilos",
     "stock_minimo": 5
@@ -39,27 +39,9 @@
     "codigo": "005",
     "nombre": "Pollo",
     "precio": 5000,
-    "stock": 26,
+    "stock": 15,
     "categoria": "Carnes",
     "unidad": "kilos",
     "stock_minimo": 5
-  },
-  {
-    "codigo": "006",
-    "nombre": "Carne Molida",
-    "precio": 4500,
-    "stock": 4.0,
-    "categoria": "Carnes",
-    "unidad": "kilos",
-    "stock_minimo": 5
-  },
-  {
-    "codigo": "007",
-    "nombre": "Coca Cola 2L",
-    "precio": 2000,
-    "stock": 30,
-    "categoria": "Bebidas",
-    "unidad": "unidades",
-    "stock_minimo": 10
   }
 ]

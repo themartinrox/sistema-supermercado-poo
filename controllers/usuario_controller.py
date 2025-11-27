@@ -10,7 +10,9 @@ from typing import Dict, Optional
 from models.usuario import Usuario
 
 class UsuarioController:
-    """Controlador encargado de la gestión de usuarios."""
+    """
+    Controlador encargado de la gestión de usuarios (autenticación y registro).
+    """
     
     def __init__(self, archivo_usuarios: str = 'data/usuarios.json'):
         self.archivo_usuarios = archivo_usuarios
@@ -18,7 +20,7 @@ class UsuarioController:
         self.cargar_usuarios()
 
     def cargar_usuarios(self):
-        """Carga los usuarios desde el archivo JSON."""
+        """Carga la base de datos de usuarios desde JSON."""
         if os.path.exists(self.archivo_usuarios):
             try:
                 with open(self.archivo_usuarios, 'r', encoding='utf-8') as f:
@@ -33,7 +35,7 @@ class UsuarioController:
             self._crear_usuarios_ejemplo()
 
     def guardar_usuarios(self):
-        """Guarda los usuarios en el archivo JSON."""
+        """Persiste los usuarios en el archivo JSON."""
         try:
             usuarios_list = [u.to_dict() for u in self.usuarios.values()]
             with open(self.archivo_usuarios, 'w', encoding='utf-8') as f:
@@ -42,7 +44,7 @@ class UsuarioController:
             print(f"Error al guardar usuarios: {e}")
 
     def _crear_usuarios_ejemplo(self):
-        """Crea usuario admin por defecto."""
+        """Genera un usuario administrador por defecto si no existe."""
         if "admin" not in self.usuarios:
             admin = Usuario("admin", "admin123", "admin")
             self.usuarios[admin.username] = admin
@@ -50,7 +52,10 @@ class UsuarioController:
             print("Usuario admin creado (user: admin, pass: admin123)")
 
     def registrar_usuario(self, username, password, role='comprador') -> bool:
-        """Registra un nuevo usuario."""
+        """
+        Crea un nuevo usuario en el sistema.
+        Retorna False si el nombre de usuario ya está en uso.
+        """
         if username in self.usuarios:
             return False
         
@@ -60,7 +65,10 @@ class UsuarioController:
         return True
 
     def autenticar_usuario(self, username, password) -> Optional[Usuario]:
-        """Verifica credenciales y retorna el usuario si es válido."""
+        """
+        Valida las credenciales de un usuario.
+        Retorna el objeto Usuario si es correcto, None en caso contrario.
+        """
         usuario = self.usuarios.get(username)
         if usuario and usuario.password == password:
             return usuario

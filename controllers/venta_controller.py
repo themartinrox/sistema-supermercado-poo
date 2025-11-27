@@ -11,16 +11,19 @@ from models.venta import Venta
 from .producto_controller import ProductoController
 
 class VentaController:
-    """Controlador encargado de la gestión de ventas."""
+    """
+    Controlador encargado de procesar las ventas y generar reportes.
+    Mantiene el historial de transacciones.
+    """
     
     def __init__(self, producto_controller: ProductoController, archivo_ventas: str = 'data/ventas.json'):
         self.archivo_ventas = archivo_ventas
-        self.producto_controller = producto_controller
+        self.producto_controller = producto_controller # Dependencia para validar stock
         self.ventas: List[dict] = []
         self.cargar_ventas()
 
     def cargar_ventas(self):
-        """Carga las ventas desde el archivo JSON."""
+        """Carga el historial de ventas desde el archivo JSON."""
         if os.path.exists(self.archivo_ventas):
             try:
                 with open(self.archivo_ventas, 'r', encoding='utf-8') as f:
@@ -35,7 +38,7 @@ class VentaController:
             self.guardar_ventas()
 
     def guardar_ventas(self):
-        """Guarda las ventas en el archivo JSON."""
+        """Guarda el historial de ventas actualizado en el archivo JSON."""
         try:
             with open(self.archivo_ventas, 'w', encoding='utf-8') as f:
                 json.dump(self.ventas, f, indent=2, ensure_ascii=False)
@@ -43,7 +46,10 @@ class VentaController:
             print(f"Error al guardar ventas: {e}")
 
     def obtener_siguiente_id(self) -> int:
-        """Calcula el siguiente ID de venta basado en el historial."""
+        """
+        Genera un ID autoincremental para la próxima venta.
+        Busca el ID más alto existente y le suma 1.
+        """
         if not self.ventas:
             return 1
         
@@ -58,21 +64,24 @@ class VentaController:
 
     def realizar_venta(self, items: List[tuple]) -> Optional[Venta]:
         """
-        Realiza una venta.
+        Procesa una nueva venta.
+        1. Valida stock suficiente para todos los items.
+        2. Descuenta stock.
+        3. Registra la venta.
         items: lista de tuplas (codigo_producto, cantidad)
         """
         # Generar ID único para la venta
         nuevo_id = self.obtener_siguiente_id()
         venta = Venta(id_venta=nuevo_id)
         
-        # Validar stock antes de procesar
+        # Validar stock antes de procesar (Transaccionalidad básica)
         for codigo, cantidad in items:
             producto = self.producto_controller.productos.get(codigo)
             if not producto or producto.stock < cantidad:
                 print(f"Stock insuficiente para {producto.nombre if producto else 'producto desconocido'}.")
                 return None
         
-        # Procesar la venta
+        # Procesar la venta (Descontar stock y agregar items)
         for codigo, cantidad in items:
             producto = self.producto_controller.productos[codigo]
             venta.agregar_item(producto, cantidad)
@@ -84,7 +93,10 @@ class VentaController:
         return venta
 
     def obtener_estadisticas(self) -> dict:
-        """Calcula estadísticas del supermercado."""
+        """
+        Genera un resumen estadístico del negocio.
+        Incluye total de productos, ventas, ingresos y valor del inventario.
+        """
         total_productos = len(self.producto_controller.productos)
         total_ventas = len(self.ventas)
         ingresos_totales = sum(v['total'] for v in self.ventas)

@@ -10,12 +10,17 @@ from models import Producto, Usuario
 from controllers.supermercado_controller import SupermercadoController
 
 class SupermercadoGUI:
+    """
+    Clase principal de la interfaz gráfica del supermercado.
+    Maneja las pestañas y la interacción del usuario con el sistema.
+    """
     def __init__(self, root, usuario: Usuario, controller: SupermercadoController, on_logout):
         self.root = root
         self.usuario = usuario
         self.controller = controller
         self.on_logout = on_logout
         
+        # Configuración de la ventana principal
         self.root.title(f"Supermercado - {self.usuario.username} ({self.usuario.role})")
         self.root.geometry("1024x768")
         
@@ -28,9 +33,11 @@ class SupermercadoGUI:
         self._setup_header()
         self._setup_notebook()
         
+        # Evento para actualizar datos al cambiar de pestaña
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
     def _setup_header(self):
+        """Configura el encabezado con el título y botones de sesión."""
         frame_header = ttk.Frame(self.main_container)
         frame_header.pack(fill=tk.X, pady=5)
         
@@ -42,6 +49,7 @@ class SupermercadoGUI:
         ttk.Button(frame_header, text="Recargar Datos", command=self.recargar_datos).pack(side=tk.RIGHT, padx=5)
 
     def _setup_notebook(self):
+        """Configura las pestañas (tabs) según el rol del usuario."""
         self.notebook = ttk.Notebook(self.main_container)
         self.notebook.pack(fill=tk.BOTH, expand=True)
         
@@ -49,6 +57,7 @@ class SupermercadoGUI:
         self.tab_ventas = ttk.Frame(self.notebook)
         
         if self.usuario.role == 'admin':
+            # Pestañas exclusivas de administrador
             self.tab_reportes = ttk.Frame(self.notebook)
             self.tab_alertas = ttk.Frame(self.notebook)
             
@@ -62,6 +71,7 @@ class SupermercadoGUI:
             self.init_reportes()
             self.init_alertas()
         else: # Comprador
+            # Pestañas para comprador
             self.notebook.add(self.tab_ventas, text="Comprar")
             self.notebook.add(self.tab_inventario, text="Catálogo")
             
@@ -95,6 +105,7 @@ class SupermercadoGUI:
 
     # --- Pestaña de Inventario (Admin) ---
     def init_inventario_admin(self):
+        """Inicializa la pestaña de inventario para administradores."""
         # Controles
         frame_controles = ttk.Frame(self.tab_inventario)
         frame_controles.pack(fill=tk.X, pady=5)
@@ -110,7 +121,7 @@ class SupermercadoGUI:
         self.entry_buscar_inv.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         self.entry_buscar_inv.bind('<KeyRelease>', lambda e: self.cargar_inventario_admin())
         
-        # Tabla
+        # Tabla de productos
         columns = ('codigo', 'nombre', 'precio', 'stock', 'unidad', 'categoria', 'estado')
         self.tree_inv = ttk.Treeview(self.tab_inventario, columns=columns, show='headings')
         for col in columns:
@@ -119,10 +130,12 @@ class SupermercadoGUI:
         self.cargar_inventario_admin()
 
     def cargar_inventario_admin(self):
+        """Carga y muestra los productos en la tabla de inventario."""
         for item in self.tree_inv.get_children():
             self.tree_inv.delete(item)
         
         termino = self.entry_buscar_inv.get()
+        # Filtra si hay término de búsqueda, sino muestra todo
         productos = self.controller.buscar_producto(termino) if termino else self.controller.productos.values()
         
         for p in sorted(productos, key=lambda x: x.nombre):
@@ -164,10 +177,11 @@ class SupermercadoGUI:
 
     # --- Pestaña de Ventas ---
     def init_ventas(self):
+        """Inicializa la interfaz de ventas (POS)."""
         paned = ttk.PanedWindow(self.tab_ventas, orient=tk.HORIZONTAL)
         paned.pack(fill=tk.BOTH, expand=True)
         
-        # Panel de productos
+        # Panel de productos disponibles
         frame_prod = ttk.Labelframe(paned, text="Productos Disponibles")
         self.entry_buscar_venta = ttk.Entry(frame_prod)
         self.entry_buscar_venta.pack(fill=tk.X, padx=5, pady=5)
@@ -186,7 +200,7 @@ class SupermercadoGUI:
         self.entry_cant_venta.insert(0, "1")
         ttk.Button(frame_add, text="Agregar ->", command=self.agregar_al_carrito).pack(side=tk.RIGHT)
         
-        # Panel de carrito
+        # Panel de carrito de compras
         frame_cart = ttk.Labelframe(paned, text="Carrito")
         cols_cart = ('nombre', 'cantidad', 'subtotal')
         self.tree_cart = ttk.Treeview(frame_cart, columns=cols_cart, show='headings')
@@ -202,10 +216,11 @@ class SupermercadoGUI:
         paned.add(frame_prod, weight=1)
         paned.add(frame_cart, weight=1)
         
-        self.carrito_items = {} # {codigo: cantidad}
+        self.carrito_items = {} # Diccionario para almacenar items del carrito {codigo: cantidad}
         self.cargar_productos_venta()
 
     def cargar_productos_venta(self):
+        """Carga los productos disponibles para la venta (stock > 0)."""
         for item in self.tree_venta_prod.get_children():
             self.tree_venta_prod.delete(item)
         
@@ -217,6 +232,7 @@ class SupermercadoGUI:
                 self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", p.stock))
 
     def agregar_al_carrito(self):
+        """Agrega el producto seleccionado al carrito de compras."""
         selected = self.tree_venta_prod.selection()
         if not selected: return
         codigo = selected[0]
@@ -231,6 +247,7 @@ class SupermercadoGUI:
             if cantidad > producto.stock:
                 raise ValueError(f"Stock insuficiente. Disponible: {producto.stock}")
 
+            # Actualiza la cantidad si ya existe en el carrito
             self.carrito_items[codigo] = self.carrito_items.get(codigo, 0) + cantidad
             self.actualizar_carrito_y_total()
 
@@ -238,6 +255,7 @@ class SupermercadoGUI:
             messagebox.showerror("Error", str(e))
 
     def actualizar_carrito_y_total(self):
+        """Refresca la vista del carrito y recalcula el total."""
         for item in self.tree_cart.get_children():
             self.tree_cart.delete(item)
         
@@ -251,10 +269,12 @@ class SupermercadoGUI:
         self.lbl_total.config(text=f"TOTAL: ${total:,.0f}")
 
     def limpiar_carrito(self):
+        """Vacía el carrito de compras."""
         self.carrito_items.clear()
         self.actualizar_carrito_y_total()
 
     def finalizar_venta(self):
+        """Procesa la venta final, actualizando stock y guardando registro."""
         if not self.carrito_items: return
         
         items_venta = list(self.carrito_items.items())
@@ -269,6 +289,7 @@ class SupermercadoGUI:
 
     # --- Pestaña de Reportes ---
     def init_reportes(self):
+        """Inicializa la vista de reportes y estadísticas."""
         self.frame_stats = ttk.Frame(self.tab_reportes, padding=20)
         self.frame_stats.pack(fill=tk.BOTH, expand=True)
         
@@ -289,6 +310,7 @@ class SupermercadoGUI:
         self.actualizar_reportes()
 
     def actualizar_reportes(self):
+        """Calcula y muestra las estadísticas actualizadas."""
         stats = self.controller.obtener_estadisticas()
         self.lbl_stats_prod.config(text=f"Total Productos: {stats['total_productos']} (Valor: ${stats['valor_inventario']:,.0f})")
         self.lbl_stats_ventas.config(text=f"Total Ventas: {stats['total_ventas']}")
@@ -303,6 +325,7 @@ class SupermercadoGUI:
 
     # --- Pestaña de Alertas ---
     def init_alertas(self):
+        """Inicializa la vista de alertas de stock bajo."""
         ttk.Label(self.tab_alertas, text="Productos con Stock Crítico", font=('Helvetica', 14, 'bold'), foreground='red').pack(pady=10)
         cols = ('codigo', 'nombre', 'stock', 'minimo')
         self.tree_alertas = ttk.Treeview(self.tab_alertas, columns=cols, show='headings')
@@ -312,6 +335,7 @@ class SupermercadoGUI:
         self.cargar_alertas()
 
     def cargar_alertas(self):
+        """Filtra y muestra solo los productos con stock bajo."""
         for item in self.tree_alertas.get_children():
             self.tree_alertas.delete(item)
         for p in self.controller.obtener_productos_stock_bajo():
