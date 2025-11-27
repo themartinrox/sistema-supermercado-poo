@@ -34,12 +34,12 @@ class SupermercadoGUI:
         frame_header = ttk.Frame(self.main_container)
         frame_header.pack(fill=tk.X, pady=5)
         
-        titulo_texto = "🛒 Supermercado Manager" if self.usuario.role == 'admin' else "🛒 Supermercado - Compras"
+        titulo_texto = "Supermercado Manager" if self.usuario.role == 'admin' else "Supermercado - Compras"
         lbl_titulo = ttk.Label(frame_header, text=titulo_texto, font=('Helvetica', 18, 'bold'))
         lbl_titulo.pack(side=tk.LEFT, pady=(0, 10))
 
         ttk.Button(frame_header, text="Cerrar Sesión", command=self.cerrar_sesion).pack(side=tk.RIGHT)
-        ttk.Button(frame_header, text="🔄 Recargar Datos", command=self.recargar_datos).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(frame_header, text="Recargar Datos", command=self.recargar_datos).pack(side=tk.RIGHT, padx=5)
 
     def _setup_notebook(self):
         self.notebook = ttk.Notebook(self.main_container)
@@ -52,18 +52,18 @@ class SupermercadoGUI:
             self.tab_reportes = ttk.Frame(self.notebook)
             self.tab_alertas = ttk.Frame(self.notebook)
             
-            self.notebook.add(self.tab_inventario, text="📦 Inventario")
-            self.notebook.add(self.tab_ventas, text="💰 Ventas")
-            self.notebook.add(self.tab_reportes, text="📊 Reportes")
-            self.notebook.add(self.tab_alertas, text="⚠️ Alertas")
+            self.notebook.add(self.tab_inventario, text="Inventario")
+            self.notebook.add(self.tab_ventas, text="Ventas")
+            self.notebook.add(self.tab_reportes, text="Reportes")
+            self.notebook.add(self.tab_alertas, text="Alertas")
             
             self.init_inventario_admin()
             self.init_ventas()
             self.init_reportes()
             self.init_alertas()
         else: # Comprador
-            self.notebook.add(self.tab_ventas, text="🛒 Comprar")
-            self.notebook.add(self.tab_inventario, text="📋 Catálogo")
+            self.notebook.add(self.tab_ventas, text="Comprar")
+            self.notebook.add(self.tab_inventario, text="Catálogo")
             
             self.init_ventas()
             self.init_inventario_comprador()
@@ -98,11 +98,11 @@ class SupermercadoGUI:
         # Controles
         frame_controles = ttk.Frame(self.tab_inventario)
         frame_controles.pack(fill=tk.X, pady=5)
-        ttk.Button(frame_controles, text="➕ Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="🔄 Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="🗑️ Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="♻️ Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="👤 Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_controles, text="Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
         
         # Búsqueda
         ttk.Label(frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
@@ -126,8 +126,8 @@ class SupermercadoGUI:
         productos = self.controller.buscar_producto(termino) if termino else self.controller.productos.values()
         
         for p in sorted(productos, key=lambda x: x.nombre):
-            estado = "⚠️ BAJO" if p.tiene_stock_bajo() else "✅ OK"
-            if p.stock == 0: estado = "❌ AGOTADO"
+            estado = "BAJO" if p.tiene_stock_bajo() else "OK"
+            if p.stock == 0: estado = "AGOTADO"
             self.tree_inv.insert('', tk.END, iid=p.codigo, values=(
                 p.codigo, p.nombre, f"${p.precio:,.0f}", p.stock, p.unidad, p.categoria, estado
             ))
@@ -184,7 +184,7 @@ class SupermercadoGUI:
         self.entry_cant_venta = ttk.Entry(frame_add, width=10)
         self.entry_cant_venta.pack(side=tk.LEFT, padx=5)
         self.entry_cant_venta.insert(0, "1")
-        ttk.Button(frame_add, text="Agregar ➡️", command=self.agregar_al_carrito).pack(side=tk.RIGHT)
+        ttk.Button(frame_add, text="Agregar ->", command=self.agregar_al_carrito).pack(side=tk.RIGHT)
         
         # Panel de carrito
         frame_cart = ttk.Labelframe(paned, text="Carrito")
@@ -196,8 +196,8 @@ class SupermercadoGUI:
         self.lbl_total = ttk.Label(frame_cart, text="TOTAL: $0.00", font=('Helvetica', 14, 'bold'))
         self.lbl_total.pack(pady=5)
         
-        ttk.Button(frame_cart, text="✅ Finalizar Venta", command=self.finalizar_venta).pack(fill=tk.X, padx=5)
-        ttk.Button(frame_cart, text="🗑️ Limpiar", command=self.limpiar_carrito).pack(fill=tk.X, padx=5, pady=5)
+        ttk.Button(frame_cart, text="Finalizar Venta", command=self.finalizar_venta).pack(fill=tk.X, padx=5)
+        ttk.Button(frame_cart, text="Limpiar", command=self.limpiar_carrito).pack(fill=tk.X, padx=5, pady=5)
         
         paned.add(frame_prod, weight=1)
         paned.add(frame_cart, weight=1)
@@ -290,25 +290,25 @@ class SupermercadoGUI:
 
     def actualizar_reportes(self):
         stats = self.controller.obtener_estadisticas()
-        self.lbl_stats_prod.config(text=f"📦 Total Productos: {stats['total_productos']} (Valor: ${stats['valor_inventario']:,.0f})")
-        self.lbl_stats_ventas.config(text=f"🛒 Total Ventas: {stats['total_ventas']}")
-        self.lbl_stats_ingresos.config(text=f"💰 Ingresos Totales: ${stats['ingresos_totales']:,.0f}")
+        self.lbl_stats_prod.config(text=f"Total Productos: {stats['total_productos']} (Valor: ${stats['valor_inventario']:,.0f})")
+        self.lbl_stats_ventas.config(text=f"Total Ventas: {stats['total_ventas']}")
+        self.lbl_stats_ingresos.config(text=f"Ingresos Totales: ${stats['ingresos_totales']:,.0f}")
         
         self.txt_log.config(state='normal')
         self.txt_log.delete(1.0, tk.END)
         for venta in reversed(self.controller.ventas[-10:]):
             id_venta = venta.get('id', 'N/A')
-            self.txt_log.insert(tk.END, f"🆔 {id_venta} | 📅 {venta['fecha']} | Total: ${venta['total']:,.0f} | Items: {len(venta['items'])}\n")
+            self.txt_log.insert(tk.END, f"ID {id_venta} | Fecha {venta['fecha']} | Total: ${venta['total']:,.0f} | Items: {len(venta['items'])}\n")
         self.txt_log.config(state='disabled')
 
     # --- Pestaña de Alertas ---
     def init_alertas(self):
-        ttk.Label(self.tab_alertas, text="⚠️ Productos con Stock Crítico", font=('Helvetica', 14, 'bold'), foreground='red').pack(pady=10)
+        ttk.Label(self.tab_alertas, text="Productos con Stock Crítico", font=('Helvetica', 14, 'bold'), foreground='red').pack(pady=10)
         cols = ('codigo', 'nombre', 'stock', 'minimo')
         self.tree_alertas = ttk.Treeview(self.tab_alertas, columns=cols, show='headings')
         for col in cols: self.tree_alertas.heading(col, text=col.capitalize())
         self.tree_alertas.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
-        ttk.Button(self.tab_alertas, text="🔄 Actualizar", command=self.cargar_alertas).pack(pady=10)
+        ttk.Button(self.tab_alertas, text="Actualizar", command=self.cargar_alertas).pack(pady=10)
         self.cargar_alertas()
 
     def cargar_alertas(self):
@@ -327,7 +327,7 @@ class SupermercadoGUI:
         form_frame = ttk.Frame(self.tab_inventario)
         form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        ttk.Label(form_frame, text="➕ Nuevo Producto", font=('Helvetica', 14, 'bold')).pack(pady=10)
+        ttk.Label(form_frame, text="Nuevo Producto", font=('Helvetica', 14, 'bold')).pack(pady=10)
         
         # Campos del formulario
         campos_frame = ttk.Frame(form_frame)
@@ -468,7 +468,7 @@ class SupermercadoGUI:
         form_frame = ttk.Frame(self.tab_inventario)
         form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        ttk.Label(form_frame, text=f"🔄 Actualizar Stock", font=('Helvetica', 14, 'bold')).pack(pady=10)
+        ttk.Label(form_frame, text=f"Actualizar Stock", font=('Helvetica', 14, 'bold')).pack(pady=10)
         ttk.Label(form_frame, text=f"Producto: {producto.nombre}", font=('Helvetica', 12)).pack(pady=5)
         ttk.Label(form_frame, text=f"Stock actual: {producto.stock} {producto.unidad}", font=('Helvetica', 10)).pack(pady=5)
         
@@ -500,7 +500,7 @@ class SupermercadoGUI:
                 if self.controller.actualizar_stock(codigo, cant, tipo_var.get()):
                     prod = self.controller.productos[codigo]
                     if prod.tiene_stock_bajo():
-                        messagebox.showwarning("⚠️ Alerta de Stock", f"El producto '{prod.nombre}' tiene stock bajo: {prod.stock} {prod.unidad}")
+                        messagebox.showwarning("Alerta de Stock", f"El producto '{prod.nombre}' tiene stock bajo: {prod.stock} {prod.unidad}")
                     else:
                         messagebox.showinfo("Éxito", "Stock actualizado correctamente")
                     
@@ -561,7 +561,7 @@ class SupermercadoGUI:
         form_frame = ttk.Frame(self.tab_inventario)
         form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        ttk.Label(form_frame, text="👤 Nuevo Administrador", font=('Helvetica', 14, 'bold')).pack(pady=10)
+        ttk.Label(form_frame, text="Nuevo Administrador", font=('Helvetica', 14, 'bold')).pack(pady=10)
         
         # Campos del formulario
         campos_frame = ttk.Frame(form_frame)
@@ -619,7 +619,7 @@ class LoginWindow:
         self.frame = ttk.Frame(root, padding="20")
         self.frame.pack(fill=tk.BOTH, expand=True)
         
-        ttk.Label(self.frame, text="🔐 Iniciar Sesión", font=('Helvetica', 16, 'bold')).pack(pady=20)
+        ttk.Label(self.frame, text="Iniciar Sesión", font=('Helvetica', 16, 'bold')).pack(pady=20)
         
         ttk.Label(self.frame, text="Usuario:").pack(anchor=tk.W)
         self.entry_user = ttk.Entry(self.frame)
@@ -656,7 +656,7 @@ class RegistroWindow:
         self.frame = ttk.Frame(root, padding="20")
         self.frame.pack(fill=tk.BOTH, expand=True)
         
-        ttk.Label(self.frame, text="📝 Nuevo Usuario", font=('Helvetica', 14, 'bold')).pack(pady=20)
+        ttk.Label(self.frame, text="Nuevo Usuario", font=('Helvetica', 14, 'bold')).pack(pady=20)
         
         ttk.Label(self.frame, text="Usuario:").pack(anchor=tk.W)
         self.entry_user = ttk.Entry(self.frame)

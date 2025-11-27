@@ -24,12 +24,12 @@ class UsuarioController:
                 with open(self.archivo_usuarios, 'r', encoding='utf-8') as f:
                     usuarios_data = json.load(f)
                 self.usuarios = {u['username']: Usuario.from_dict(u) for u in usuarios_data}
-                print(f"✓ Usuarios cargados: {len(self.usuarios)}")
+                print(f"Usuarios cargados: {len(self.usuarios)}")
             except Exception as e:
-                print(f"⚠️ Error al cargar usuarios: {e}")
+                print(f"Error al cargar usuarios: {e}")
                 self._crear_usuarios_ejemplo()
         else:
-            print("⚠️ No se encontró archivo de usuarios. Creando usuario admin.")
+            print("No se encontró archivo de usuarios. Creando usuario admin.")
             self._crear_usuarios_ejemplo()
 
     def guardar_usuarios(self):
@@ -39,7 +39,7 @@ class UsuarioController:
             with open(self.archivo_usuarios, 'w', encoding='utf-8') as f:
                 json.dump(usuarios_list, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error al guardar usuarios: {e}")
+            print(f"Error al guardar usuarios: {e}")
 
     def _crear_usuarios_ejemplo(self):
         """Crea usuario admin por defecto."""
@@ -47,7 +47,7 @@ class UsuarioController:
             admin = Usuario("admin", "admin123", "admin")
             self.usuarios[admin.username] = admin
             self.guardar_usuarios()
-            print("✓ Usuario admin creado (user: admin, pass: admin123)")
+            print("Usuario admin creado (user: admin, pass: admin123)")
 
     def registrar_usuario(self, username, password, role='comprador') -> bool:
         """Registra un nuevo usuario."""

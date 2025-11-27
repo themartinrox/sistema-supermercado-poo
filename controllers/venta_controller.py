@@ -25,12 +25,12 @@ class VentaController:
             try:
                 with open(self.archivo_ventas, 'r', encoding='utf-8') as f:
                     self.ventas = json.load(f)
-                print(f"✓ Ventas cargadas: {len(self.ventas)}")
+                print(f"Ventas cargadas: {len(self.ventas)}")
             except Exception as e:
-                print(f"⚠️ Error al cargar ventas: {e}")
+                print(f"Error al cargar ventas: {e}")
                 self.ventas = []
         else:
-            print("⚠️ No se encontró archivo de ventas. Iniciando sin ventas.")
+            print("No se encontró archivo de ventas. Iniciando sin ventas.")
             self.ventas = []
             self.guardar_ventas()
 
@@ -40,7 +40,7 @@ class VentaController:
             with open(self.archivo_ventas, 'w', encoding='utf-8') as f:
                 json.dump(self.ventas, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error al guardar ventas: {e}")
+            print(f"Error al guardar ventas: {e}")
 
     def obtener_siguiente_id(self) -> int:
         """Calcula el siguiente ID de venta basado en el historial."""
@@ -69,7 +69,7 @@ class VentaController:
         for codigo, cantidad in items:
             producto = self.producto_controller.productos.get(codigo)
             if not producto or producto.stock < cantidad:
-                print(f"❌ Stock insuficiente para {producto.nombre if producto else 'producto desconocido'}.")
+                print(f"Stock insuficiente para {producto.nombre if producto else 'producto desconocido'}.")
                 return None
         
         # Procesar la venta

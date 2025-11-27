@@ -45,7 +45,7 @@ class Producto:
         if unidad_obj.nombre == 'unidades':
             # Si es unidades pero tiene decimales, corregir
             if isinstance(stock, float) and not stock.is_integer():
-                print(f"⚠️ Corrección de datos: {data['nombre']} tenía stock decimal ({stock}). Se redondeó a {round(stock)}.")
+                print(f"Corrección de datos: {data['nombre']} tenía stock decimal ({stock}). Se redondeó a {round(stock)}.")
                 stock = round(stock)
             
             if isinstance(stock_minimo, float) and not stock_minimo.is_integer():
@@ -66,5 +66,5 @@ class Producto:
         return self.stock <= self.stock_minimo
     
     def __str__(self) -> str:
-        alerta = " ⚠️ STOCK BAJO" if self.tiene_stock_bajo() else ""
+        alerta = " STOCK BAJO" if self.tiene_stock_bajo() else ""
         return f"{self.codigo} | {self.nombre} | ${self.precio:,.0f} | Stock: {self.stock} {self.unidad.nombre}{alerta}"

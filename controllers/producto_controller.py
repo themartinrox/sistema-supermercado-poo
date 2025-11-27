@@ -26,12 +26,12 @@ class ProductoController:
                 with open(self.archivo_productos, 'r', encoding='utf-8') as f:
                     productos_data = json.load(f)
                 self.productos = {p['codigo']: Producto.from_dict(p) for p in productos_data}
-                print(f"✓ Productos cargados: {len(self.productos)}")
+                print(f"Productos cargados: {len(self.productos)}")
             except Exception as e:
-                print(f"⚠️ Error al cargar productos: {e}")
+                print(f"Error al cargar productos: {e}")
                 self._crear_productos_ejemplo()
         else:
-            print("⚠️ No se encontró archivo de productos. Creando productos de ejemplo.")
+            print("No se encontró archivo de productos. Creando productos de ejemplo.")
             self._crear_productos_ejemplo()
 
     def guardar_productos(self):
@@ -41,7 +41,7 @@ class ProductoController:
             with open(self.archivo_productos, 'w', encoding='utf-8') as f:
                 json.dump(productos_list, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error al guardar productos: {e}")
+            print(f"Error al guardar productos: {e}")
 
     def _crear_productos_ejemplo(self):
         """Crea productos de ejemplo si no existen datos."""
@@ -55,37 +55,37 @@ class ProductoController:
         for producto in productos_ejemplo:
             self.productos[producto.codigo] = producto
         self.guardar_productos()
-        print("✓ Productos de ejemplo creados")
+        print("Productos de ejemplo creados")
 
     def agregar_producto(self, producto: Producto) -> bool:
         """Agrega un nuevo producto al inventario."""
         if producto.codigo in self.productos:
-            print(f"❌ Ya existe un producto con el código {producto.codigo}")
+            print(f"Ya existe un producto con el código {producto.codigo}")
             return False
         
         self.productos[producto.codigo] = producto
         self.guardar_productos()
-        print(f"✓ Producto '{producto.nombre}' agregado exitosamente")
+        print(f"Producto '{producto.nombre}' agregado exitosamente")
         return True
 
     def actualizar_stock(self, codigo: str, cantidad: float, operacion: str = 'agregar') -> bool:
         """Actualiza el stock de un producto."""
         producto = self.productos.get(codigo)
         if not producto:
-            print(f"❌ Producto con código {codigo} no encontrado")
+            print(f"Producto con código {codigo} no encontrado")
             return False
         
         if operacion == 'agregar':
             producto.stock += cantidad
         elif operacion == 'restar':
             if producto.stock < cantidad:
-                print(f"❌ Stock insuficiente. Disponible: {producto.stock} {producto.unidad.nombre}")
+                print(f"Stock insuficiente. Disponible: {producto.stock} {producto.unidad.nombre}")
                 return False
             producto.stock -= cantidad
         
-        print(f"✓ Stock actualizado: {producto.nombre} ahora tiene {producto.stock} {producto.unidad.nombre}")
+        print(f"Stock actualizado: {producto.nombre} ahora tiene {producto.stock} {producto.unidad.nombre}")
         if producto.tiene_stock_bajo():
-            print(f"⚠️ ALERTA: {producto.nombre} tiene stock bajo ({producto.stock} {producto.unidad.nombre})")
+            print(f"ALERTA: {producto.nombre} tiene stock bajo ({producto.stock} {producto.unidad.nombre})")
         
         self.guardar_productos()
         return True
@@ -109,13 +109,13 @@ class ProductoController:
     def eliminar_producto(self, codigo: str) -> bool:
         """Elimina un producto del inventario."""
         if codigo not in self.productos:
-            print(f"❌ Producto con código {codigo} no encontrado")
+            print(f"Producto con código {codigo} no encontrado")
             return False
         
         producto = self.productos[codigo]
         del self.productos[codigo]
         self.guardar_productos()
-        print(f"✓ Producto '{producto.nombre}' eliminado exitosamente")
+        print(f"Producto '{producto.nombre}' eliminado exitosamente")
         return True
 
     def reiniciar_productos(self) -> bool:
@@ -125,5 +125,5 @@ class ProductoController:
             self._crear_productos_ejemplo()
             return True
         except Exception as e:
-            print(f"❌ Error al reiniciar productos: {e}")
+            print(f"Error al reiniciar productos: {e}")
             return False
