@@ -14,7 +14,7 @@ class Usuario:
     def __init__(self, username: str, password: str, role: str = 'comprador'):
         self.username = username
         self.password = password
-        self.role = role  # 'admin' o 'comprador'
+        self.role = role  # admin o comprador
 
     def to_dict(self) -> dict:
         """Convierte el objeto a un diccionario para serialización JSON."""
