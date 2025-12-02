@@ -57,16 +57,16 @@
 *   **Ignacio:** "Continuando con la implementación, quiero destacar cómo aplicamos la POO en el código. Aquí vemos la clase `Producto`. En el constructor `__init__`, pueden ver la composición que mencionaba Juan."
 *   **Ignacio:** "Recibimos objetos de tipo `Categoria` y `Unidad`. Esto es crucial porque nos permite escalar. Si mañana la `Categoria` necesita tener una descripción o un código propio, solo modificamos la clase `Categoria` y el `Producto` se adapta automáticamente. Además, el método `to_dict` es fundamental para serializar nuestros objetos a JSON."
 
-**Diapositiva 10: Algoritmo de Generación de IDs**
-*   **Ignacio:** "Uno de los desafíos lógicos fue la generación de IDs únicos para las boletas sin usar una base de datos SQL con *autoincrement*. Desarrollamos este algoritmo en `VentaController`."
-*   **Ignacio:** "El método `obtener_siguiente_id` recorre nuestro historial de ventas cargado en memoria, busca el ID máximo existente y le suma 1. Si no hay ventas, inicia en 1. Esto asegura que, aunque cerremos y abramos el programa, la numeración de las boletas siempre sea correlativa y consistente."
+**Diapositiva 10: Algoritmos de Generación Automática**
+*   **Ignacio:** "Uno de los desafíos lógicos fue la generación de identificadores únicos. Implementamos algoritmos de autoincremento tanto para las **Ventas** como para los **Productos**."
+*   **Ignacio:** "En `ProductoController`, el método `generar_codigo` escanea los códigos existentes (como '001', '002') y genera el siguiente automáticamente. Esto evita que el usuario tenga que inventar códigos y previene duplicados. Lo mismo aplicamos para los IDs de las boletas en `VentaController`, asegurando una numeración correlativa y consistente incluso al reiniciar el programa."
 
-**Diapositiva 11: Lógica de Venta**
+**Diapositiva 11: Lógica de Venta y Validaciones**
 *   **Ignacio:** "El corazón del sistema es el método `realizar_venta`. Este método es transaccional. Recibe una lista de items y hace tres cosas críticas:"
     1.  "Genera el nuevo ID."
-    2.  "Itera sobre los productos y descuenta el stock en tiempo real usando `actualizar_stock`."
+    2.  "Itera sobre los productos y descuenta el stock en tiempo real."
     3.  "Guarda la venta en el archivo JSON inmediatamente."
-*   **Ignacio:** "Es importante notar que validamos el stock *antes* de llamar a este método en la interfaz, pero aquí hacemos el descuento efectivo. Si se fijan, el controlador de ventas se comunica con el controlador de productos, demostrando la interacción entre módulos."
+*   **Ignacio:** "Además, hemos blindado el sistema con validaciones estrictas en los controladores. Por ejemplo, en `UsuarioController`, utilizamos métodos de cadena y validaciones lógicas para impedir espacios en los nombres de usuario o caracteres especiales no permitidos, asegurando la integridad de los datos antes de que lleguen al archivo JSON."
 
 ---
 
@@ -76,7 +76,8 @@
 **Diapositiva 12: Funcionalidades Clave**
 *   **Diego:** "Para el usuario final, toda esa lógica se traduce en funcionalidades concretas. El sistema cuenta con:"
     *   **Control de Acceso:** Tenemos roles diferenciados. Un vendedor no puede borrar productos ni crear administradores; solo un Admin puede hacerlo.
-    *   **Gestión de Inventario:** Permite crear, editar y eliminar productos, con soporte para unidades y kilos.
+    *   **Gestión de Inventario:** Permite crear, editar y eliminar productos, con soporte para **unidades y gramos**.
+    *   **Integridad de Datos:** El sistema valida automáticamente que los stocks sean números enteros cuando corresponde y bloquea entradas inválidas en el registro de usuarios.
     *   **Punto de Venta (POS):** Es la pantalla principal de venta. Es rápida, permite buscar por nombre y calcula el total automáticamente.
     *   **Administración:** Agregamos una función para crear nuevos administradores desde la misma interfaz, algo que facilita la autogestión del negocio."
 
