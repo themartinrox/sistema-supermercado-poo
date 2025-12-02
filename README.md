@@ -1,19 +1,19 @@
-# 🛒 Sistema de Administración de Supermercado
+# Sistema de Administración de Supermercado
 
 Sistema completo de gestión para supermercados desarrollado en Python. Permite administrar inventario, realizar ventas, generar reportes y recibir alertas de stock bajo.
 
-## 📋 Características Principales
+## Características Principales
 
-### ✅ Gestión de Inventario
+### Gestión de Inventario
 - **Ver inventario completo** organizado por categorías
 - **Agregar nuevos productos** con toda su información
 - **Actualizar stock** (agregar o reducir cantidades)
-- **🗑️ Eliminar productos** del inventario
-- **♻️ Reiniciar productos** a valores por defecto (sin afectar ventas/usuarios)
+- **Eliminar productos** del inventario
+- **Reiniciar productos** a valores por defecto (sin afectar ventas/usuarios)
 - **Buscar productos** por código, nombre o categoría
 - **Alertas automáticas** cuando el stock llega a niveles críticos (≤5 unidades/kilos)
 
-### 💰 Sistema de Ventas
+### Sistema de Ventas
 - **Visualización de productos disponibles** antes de vender
 - **Validación de stock** en tiempo real
 - **Carrito de compras** interactivo
@@ -22,7 +22,7 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - **Registro histórico** de todas las ventas realizadas
 - **Generación de Boleta** con ID único de venta
 
-### 📊 Reportes y Estadísticas
+### Reportes y Estadísticas
 - Total de productos en catálogo
 - Valor total del inventario
 - Número de ventas realizadas
@@ -31,18 +31,18 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - Productos sin stock
 - Historial de últimas ventas
 
-### 🔔 Sistema de Alertas
+### Sistema de Alertas
 - **Notificaciones de stock bajo** cuando productos llegan a 5 unidades/kilos
 - **Alertas de productos sin stock**
 - **Panel dedicado** para visualizar todas las alertas activas
 
-### 🔄 Navegación Intuitiva
+### Navegación Intuitiva
 - **Menús interactivos** con navegación fácil
 - **Opción de volver** a la pantalla anterior en cada menú
 - **Pantalla limpia** automática para mejor visualización
 - **Confirmaciones** antes de operaciones críticas
 
-## 🚀 Instalación y Uso
+## Instalación y Uso
 
 ### Requisitos
 - Python 3.7 o superior
@@ -56,7 +56,7 @@ python main.py
 
 El sistema cargará automáticamente los 3 archivos JSON (productos, ventas, usuarios) desde la carpeta `data/` o los creará con datos de ejemplo si no existen.
 
-## 🖥️ Interfaz Gráfica (Tkinter)
+## Interfaz Gráfica (Tkinter)
 
 El proyecto incluye una interfaz gráfica moderna y fácil de usar:
 - **Pestañas de Navegación**: Inventario, Ventas, Reportes, Alertas.
@@ -65,7 +65,7 @@ El proyecto incluye una interfaz gráfica moderna y fácil de usar:
 - **Búsqueda en Tiempo Real**: Filtra productos mientras escribes.
 - **Gestión de Administradores**: Funcionalidad exclusiva para crear nuevos administradores.
 
-## ☁️ Subir a GitHub
+## Subir a GitHub
 
 El proyecto está listo para control de versiones. Sigue estos pasos para subirlo:
 
@@ -86,7 +86,7 @@ El proyecto está listo para control de versiones. Sigue estos pasos para subirl
    git push -u origin main
    ```
 
-## 🔐 Inicio de Sesión
+## Inicio de Sesión
 
 El sistema cuenta con control de acceso por roles:
 
@@ -102,7 +102,7 @@ El sistema cuenta con control de acceso por roles:
 - Desde la pantalla de inicio de sesión, puedes crear nuevas cuentas de **Comprador**.
 - Las cuentas de **Administrador** pueden crearse desde el panel de administración (requiere estar logueado como admin).
 
-## 📖 Manual de Uso
+## Manual de Uso
 
 ### Menú Principal
 Al iniciar el sistema, verás 5 opciones principales:
@@ -119,7 +119,7 @@ Al iniciar el sistema, verás 5 opciones principales:
 #### Ver Todos los Productos
 - Muestra el inventario completo organizado por categorías
 - Indica el stock actual y precio de cada producto
-- **⚠️ Marca productos con stock bajo** automáticamente
+- **Marca productos con stock bajo** automáticamente
 
 #### Agregar Nuevo Producto
 Información requerida:
@@ -162,12 +162,12 @@ Información requerida:
 ### Reportes y Estadísticas
 
 Visualiza métricas importantes:
-- 📊 Total de productos
-- 💰 Valor del inventario
-- 🛒 Ventas realizadas
-- 💵 Ingresos totales
-- ⚠️ Productos críticos
-- 📅 Historial de últimas 5 ventas
+- Total de productos
+- Valor del inventario
+- Ventas realizadas
+- Ingresos totales
+- Productos críticos
+- Historial de últimas 5 ventas
 
 ### Alertas de Stock
 
@@ -175,7 +175,7 @@ Panel centralizado que muestra:
 - **Productos sin stock** (requieren reabastecimiento urgente)
 - **Productos con stock bajo** (próximos a agotarse)
 
-## 💾 Almacenamiento de Datos
+## Almacenamiento de Datos
 
 El sistema utiliza **3 archivos JSON separados** en la carpeta `data/` para mejor organización:
 - **`data/productos.json`**: Inventario de productos
@@ -183,39 +183,38 @@ El sistema utiliza **3 archivos JSON separados** en la carpeta `data/` para mejo
 - **`data/usuarios.json`**: Cuentas de usuarios
 
 Esta separación permite:
-- 🔄 **Reiniciar productos** sin afectar ventas ni usuarios
-- 🗑️ **Eliminar productos** de forma independiente
-- 📊 **Respaldos selectivos** por tipo de datos
-- ⚡ **Mejor rendimiento** al cargar datos específicos
+- **Reiniciar productos** sin afectar ventas ni usuarios
+- **Eliminar productos** de forma independiente
+- **Respaldos selectivos** por tipo de datos
+- **Mejor rendimiento** al cargar datos específicos
 
 Los datos se guardan automáticamente después de cada operación y persisten entre sesiones.
 **Primera ejecución**: Se crean productos de ejemplo automáticamente.
 
-## 🎯 Características Destacadas
+## Características Destacadas
 
-### ✅ Validaciones Implementadas
+### Validaciones Implementadas
 - Stock disponible antes de vender
 - Códigos únicos de productos
 - Valores numéricos válidos
 - Cantidades positivas
 
-### 🔔 Sistema de Alertas Inteligente
+### Sistema de Alertas Inteligente
 - **Automático**: No requiere configuración manual
 - **Personalizable**: Stock mínimo configurable por producto
 - **Visible**: Alertas en múltiples pantallas
 - **Proactivo**: Previene quiebres de stock
 
-### 📦 Soporte Múltiples Unidades
+### Soporte Múltiples Unidades
 - **Unidades**: Para productos contables (botellas, paquetes, etc.)
 - **Kilos**: Para productos a granel (frutas, carnes, etc.)
 
-### 🎨 Interfaz Amigable
-- Emojis para mejor visualización
+### Interfaz Amigable
 - Organización por categorías
 - Mensajes claros y descriptivos
 - Navegación intuitiva
 
-## 📝 Estructura de Datos
+## Estructura de Datos
 
 ### Producto
 ```python
@@ -249,7 +248,7 @@ Los datos se guardan automáticamente después de cada operación y persisten en
 }
 ```
 
-## 🔧 Personalización
+## Personalización
 
 ### Cambiar Stock Mínimo por Defecto
 Modifica el parámetro `stock_minimo` al crear productos:
@@ -263,7 +262,7 @@ Las categorías se crean automáticamente al agregar productos.
 ### Modificar Productos de Ejemplo
 Edita el método `_crear_productos_ejemplo()` en la clase `ProductoController`.
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 **Error al cargar datos:**
 - Verifica que los archivos en `data/` no estén corruptos
@@ -276,7 +275,7 @@ Edita el método `_crear_productos_ejemplo()` en la clase `ProductoController`.
 **Stock negativo:**
 - El sistema valida que no se pueda reducir más stock del disponible
 
-## 📈 Mejoras Futuras Sugeridas
+## Mejoras Futuras Sugeridas
 
 - [ ] Exportación de reportes a PDF/Excel
 - [ ] Gráficos de ventas e inventario
@@ -287,11 +286,11 @@ Edita el método `_crear_productos_ejemplo()` en la clase `ProductoController`.
 - [ ] Control de vencimientos
 - [ ] Base de datos SQL
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto es de uso libre para fines educativos y comerciales.
 
-## 👨‍💻 Autor
+## Autor
 
 Sistema desarrollado para administración de supermercados.
 

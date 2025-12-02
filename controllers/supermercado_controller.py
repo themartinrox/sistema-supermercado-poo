@@ -11,42 +11,49 @@ from .venta_controller import VentaController
 class SupermercadoController:
     """
     Fachada que agrupa los controladores específicos del supermercado.
-    Mantiene la compatibilidad con el código existente que espera un único controlador.
+    Actúa como punto único de acceso para la interfaz gráfica, delegando
+    las operaciones a los controladores especializados.
     """
     
     def __init__(self, archivo_productos: str = 'data/productos.json', 
                  archivo_ventas: str = 'data/ventas.json',
                  archivo_usuarios: str = 'data/usuarios.json'):
         
+        # Inicialización de sub-controladores
         self.producto_controller = ProductoController(archivo_productos)
         self.usuario_controller = UsuarioController(archivo_usuarios)
         self.venta_controller = VentaController(self.producto_controller, archivo_ventas)
 
-    # Delegación de propiedades para mantener compatibilidad
+    # Delegación de propiedades para mantener compatibilidad con la vista
     @property
     def productos(self):
+        """Acceso directo al diccionario de productos."""
         return self.producto_controller.productos
     
     @property
     def ventas(self):
+        """Acceso directo a la lista de ventas."""
         return self.venta_controller.ventas
     
     @property
     def usuarios(self):
+        """Acceso directo al diccionario de usuarios."""
         return self.usuario_controller.usuarios
 
-    # Delegación de métodos
+    # Delegación de métodos de gestión de datos
     def cargar_datos(self):
+        """Recarga todos los datos desde los archivos JSON."""
         self.producto_controller.cargar_productos()
         self.usuario_controller.cargar_usuarios()
         self.venta_controller.cargar_ventas()
 
     def guardar_datos(self):
+        """Guarda todos los datos actuales en los archivos JSON."""
         self.producto_controller.guardar_productos()
         self.usuario_controller.guardar_usuarios()
         self.venta_controller.guardar_ventas()
 
-    # Métodos de Producto
+    # Métodos de Producto (Delegación)
     def agregar_producto(self, producto):
         return self.producto_controller.agregar_producto(producto)
 
@@ -68,17 +75,18 @@ class SupermercadoController:
     def reiniciar_productos(self):
         return self.producto_controller.reiniciar_productos()
 
-    # Métodos de Usuario
+    # Métodos de Usuario (Delegación)
     def registrar_usuario(self, username, password, role='comprador'):
         return self.usuario_controller.registrar_usuario(username, password, role)
 
     def autenticar_usuario(self, username, password):
         return self.usuario_controller.autenticar_usuario(username, password)
 
-    # Métodos de Venta
+    # Métodos de Venta (Delegación)
     def realizar_venta(self, items):
         return self.venta_controller.realizar_venta(items)
 
     def obtener_estadisticas(self):
         return self.venta_controller.obtener_estadisticas()
+
 
