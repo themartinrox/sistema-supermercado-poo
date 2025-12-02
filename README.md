@@ -11,7 +11,7 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - **Eliminar productos** del inventario
 - **Reiniciar productos** a valores por defecto (sin afectar ventas/usuarios)
 - **Buscar productos** por código, nombre o categoría
-- **Alertas automáticas** cuando el stock llega a niveles críticos (≤5 unidades/kilos)
+- **Alertas automáticas** cuando el stock llega a niveles críticos (≤5 unidades/gramos)
 
 ### Sistema de Ventas
 - **Visualización de productos disponibles** antes de vender
@@ -32,7 +32,7 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - Historial de últimas ventas
 
 ### Sistema de Alertas
-- **Notificaciones de stock bajo** cuando productos llegan a 5 unidades/kilos
+- **Notificaciones de stock bajo** cuando productos llegan a 5 unidades/gramos
 - **Alertas de productos sin stock**
 - **Panel dedicado** para visualizar todas las alertas activas
 
@@ -128,7 +128,7 @@ Información requerida:
 - Precio
 - Stock inicial
 - Categoría
-- Unidad de medida (unidades o kilos)
+- Unidad de medida (unidades o gramos)
 - Stock mínimo para alerta (por defecto: 5)
 
 #### Actualizar Stock
@@ -207,7 +207,7 @@ Los datos se guardan automáticamente después de cada operación y persisten en
 
 ### Soporte Múltiples Unidades
 - **Unidades**: Para productos contables (botellas, paquetes, etc.)
-- **Kilos**: Para productos a granel (frutas, carnes, etc.)
+- **Gramos**: Para productos a granel (frutas, carnes, etc.)
 
 ### Interfaz Amigable
 - Organización por categorías
@@ -224,7 +224,7 @@ Los datos se guardan automáticamente después de cada operación y persisten en
     "precio": 2.50,
     "stock": 50,
     "categoria": "Abarrotes",
-    "unidad": "kilos",
+    "unidad": "gramos",
     "stock_minimo": 10
 }
 ```
@@ -241,7 +241,7 @@ Los datos se guardan automáticamente después de cada operación y persisten en
             "cantidad": 2,
             "precio_unitario": 2.50,
             "subtotal": 5.00,
-            "unidad": "kilos"
+            "unidad": "gramos"
         }
     ],
     "total": 5.00
