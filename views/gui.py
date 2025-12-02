@@ -96,17 +96,17 @@ class SupermercadoGUI:
     # --- Pestaña de Inventario (Admin) ---
     def init_inventario_admin(self):
         # Controles
-        frame_controles = ttk.Frame(self.tab_inventario)
-        frame_controles.pack(fill=tk.X, pady=5)
-        ttk.Button(frame_controles, text="➕ Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="🔄 Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="🗑️ Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="♻️ Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="👤 Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
+        self.frame_controles = ttk.Frame(self.tab_inventario)
+        self.frame_controles.pack(fill=tk.X, pady=5)
+        ttk.Button(self.frame_controles, text="➕ Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="🔄 Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="🗑️ Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="♻️ Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="👤 Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
         
         # Búsqueda
-        ttk.Label(frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
-        self.entry_buscar_inv = ttk.Entry(frame_controles)
+        ttk.Label(self.frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
+        self.entry_buscar_inv = ttk.Entry(self.frame_controles)
         self.entry_buscar_inv.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         self.entry_buscar_inv.bind('<KeyRelease>', lambda e: self.cargar_inventario_admin())
         
@@ -129,7 +129,7 @@ class SupermercadoGUI:
             estado = "⚠️ BAJO" if p.tiene_stock_bajo() else "✅ OK"
             if p.stock == 0: estado = "❌ AGOTADO"
             self.tree_inv.insert('', tk.END, iid=p.codigo, values=(
-                p.codigo, p.nombre, f"${p.precio:,.0f}", p.stock, p.unidad, p.categoria, estado
+                p.codigo, p.nombre, f"${p.precio:,.0f}", int(p.stock), p.unidad, p.categoria, estado
             ))
 
     # --- Pestaña de Inventario (Comprador) ---
@@ -159,7 +159,7 @@ class SupermercadoGUI:
 
         for p in sorted(productos, key=lambda x: x.nombre):
             self.tree_cat.insert('', tk.END, values=(
-                p.nombre, f"${p.precio:,.0f}", f"{p.stock} {p.unidad}", p.categoria
+                p.nombre, f"${p.precio:,.0f}", f"{int(p.stock)} {p.unidad}", p.categoria
             ))
 
     # --- Pestaña de Ventas ---
@@ -214,7 +214,7 @@ class SupermercadoGUI:
         
         for p in sorted(productos, key=lambda x: x.nombre):
             if p.stock > 0:
-                self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", p.stock))
+                self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", int(p.stock)))
 
     def agregar_al_carrito(self):
         selected = self.tree_venta_prod.selection()
@@ -246,7 +246,7 @@ class SupermercadoGUI:
             producto = self.controller.productos[codigo]
             subtotal = producto.precio * cantidad
             total += subtotal
-            self.tree_cart.insert('', tk.END, values=(producto.nombre, cantidad, f"${subtotal:,.0f}"))
+            self.tree_cart.insert('', tk.END, values=(producto.nombre, int(cantidad), f"${subtotal:,.0f}"))
         
         self.lbl_total.config(text=f"TOTAL: ${total:,.0f}")
 
@@ -315,13 +315,14 @@ class SupermercadoGUI:
         for item in self.tree_alertas.get_children():
             self.tree_alertas.delete(item)
         for p in self.controller.obtener_productos_stock_bajo():
-            self.tree_alertas.insert('', tk.END, values=(p.codigo, p.nombre, p.stock, p.stock_minimo))
+            self.tree_alertas.insert('', tk.END, values=(p.codigo, p.nombre, int(p.stock), int(p.stock_minimo)))
 
     # --- Diálogos ---
     def mostrar_dialogo_producto(self):
         """Muestra formulario para agregar producto en la misma ventana"""
-        # Ocultar la tabla temporalmente
+        # Ocultar la tabla y controles temporalmente
         self.tree_inv.pack_forget()
+        self.frame_controles.pack_forget()
         
         # Crear frame para el formulario
         form_frame = ttk.Frame(self.tab_inventario)
@@ -335,11 +336,14 @@ class SupermercadoGUI:
         
         entries = {}
         
-        # Código
+        # Código (Autogenerado)
         row_frame = ttk.Frame(campos_frame)
         row_frame.pack(fill=tk.X, pady=5)
         ttk.Label(row_frame, text="Código:", width=25).pack(side=tk.LEFT)
+        nuevo_codigo = self.controller.producto_controller.generar_codigo()
         entry_codigo = ttk.Entry(row_frame)
+        entry_codigo.insert(0, nuevo_codigo)
+        entry_codigo.config(state='readonly')
         entry_codigo.pack(side=tk.LEFT, fill=tk.X, expand=True)
         entries['codigo'] = entry_codigo
         
@@ -383,7 +387,7 @@ class SupermercadoGUI:
         row_frame = ttk.Frame(campos_frame)
         row_frame.pack(fill=tk.X, pady=5)
         ttk.Label(row_frame, text="Unidad:", width=25).pack(side=tk.LEFT)
-        combo_unidad = ttk.Combobox(row_frame, state='readonly', values=["unidades", "kilos"])
+        combo_unidad = ttk.Combobox(row_frame, state='readonly', values=["unidades", "gramos"])
         combo_unidad.pack(side=tk.LEFT, fill=tk.X, expand=True)
         combo_unidad.set("unidades")  # Valor por defecto
         entries['unidad'] = combo_unidad
@@ -408,8 +412,13 @@ class SupermercadoGUI:
                     messagebox.showwarning("Error", "Todos los campos de texto son obligatorios")
                     return
 
-                if unidad not in ['unidades', 'kilos']:
-                    messagebox.showwarning("Error", "La unidad debe ser 'unidades' o 'kilos'")
+                # Validación de nombre alfabético
+                if not nombre.replace(' ', '').isalpha():
+                    messagebox.showwarning("Error", "El nombre del producto solo puede contener letras.")
+                    return
+
+                if unidad not in ['unidades', 'gramos']:
+                    messagebox.showwarning("Error", "La unidad debe ser 'unidades' o 'gramos'")
                     return
 
                 precio = int(entries['precio'].get())
@@ -443,6 +452,7 @@ class SupermercadoGUI:
         
         def cancelar():
             form_frame.destroy()
+            self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
         
         # Botones
@@ -461,8 +471,9 @@ class SupermercadoGUI:
         codigo = selected[0]
         producto = self.controller.productos[codigo]
         
-        # Ocultar la tabla temporalmente
+        # Ocultar la tabla y controles temporalmente
         self.tree_inv.pack_forget()
+        self.frame_controles.pack_forget()
         
         # Crear frame para el formulario
         form_frame = ttk.Frame(self.tab_inventario)
@@ -470,7 +481,7 @@ class SupermercadoGUI:
         
         ttk.Label(form_frame, text=f"🔄 Actualizar Stock", font=('Helvetica', 14, 'bold')).pack(pady=10)
         ttk.Label(form_frame, text=f"Producto: {producto.nombre}", font=('Helvetica', 12)).pack(pady=5)
-        ttk.Label(form_frame, text=f"Stock actual: {producto.stock} {producto.unidad}", font=('Helvetica', 10)).pack(pady=5)
+        ttk.Label(form_frame, text=f"Stock actual: {int(producto.stock)} {producto.unidad}", font=('Helvetica', 10)).pack(pady=5)
         
         # Frame para opciones
         opciones_frame = ttk.Frame(form_frame)
@@ -500,7 +511,7 @@ class SupermercadoGUI:
                 if self.controller.actualizar_stock(codigo, cant, tipo_var.get()):
                     prod = self.controller.productos[codigo]
                     if prod.tiene_stock_bajo():
-                        messagebox.showwarning("⚠️ Alerta de Stock", f"El producto '{prod.nombre}' tiene stock bajo: {prod.stock} {prod.unidad}")
+                        messagebox.showwarning("⚠️ Alerta de Stock", f"El producto '{prod.nombre}' tiene stock bajo: {int(prod.stock)} {prod.unidad}")
                     else:
                         messagebox.showinfo("Éxito", "Stock actualizado correctamente")
                     
@@ -513,6 +524,7 @@ class SupermercadoGUI:
         
         def cancelar():
             form_frame.destroy()
+            self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
         
         # Botones
@@ -554,8 +566,9 @@ class SupermercadoGUI:
 
     def mostrar_dialogo_crear_admin(self):
         """Muestra formulario para crear un nuevo administrador"""
-        # Ocultar la tabla temporalmente
+        # Ocultar la tabla y controles temporalmente
         self.tree_inv.pack_forget()
+        self.frame_controles.pack_forget()
         
         # Crear frame para el formulario
         form_frame = ttk.Frame(self.tab_inventario)
@@ -593,14 +606,18 @@ class SupermercadoGUI:
                 messagebox.showwarning("Error", "Todos los campos son obligatorios")
                 return
 
-            if self.controller.registrar_usuario(username, password, 'admin'):
-                messagebox.showinfo("Éxito", f"Administrador '{username}' creado correctamente")
-                cancelar()
-            else:
-                messagebox.showerror("Error", "El nombre de usuario ya existe")
+            try:
+                if self.controller.registrar_usuario(username, password, 'admin'):
+                    messagebox.showinfo("Éxito", f"Administrador '{username}' creado correctamente")
+                    cancelar()
+                else:
+                    messagebox.showerror("Error", "El nombre de usuario ya existe")
+            except ValueError as e:
+                messagebox.showerror("Error de Validación", str(e))
         
         def cancelar():
             form_frame.destroy()
+            self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
         
         # Botones
@@ -684,9 +701,12 @@ class RegistroWindow:
             messagebox.showwarning("Aviso", "Complete todos los campos")
             return
             
-        if self.controller.registrar_usuario(user, pwd, 'comprador'):
-            messagebox.showinfo("Éxito", "Usuario registrado. Ahora puede iniciar sesión.")
-            self.frame.destroy()
-            self.on_registro_exitoso()
-        else:
-            messagebox.showerror("Error", "El nombre de usuario ya existe")
+        try:
+            if self.controller.registrar_usuario(user, pwd, 'comprador'):
+                messagebox.showinfo("Éxito", "Usuario registrado. Ahora puede iniciar sesión.")
+                self.frame.destroy()
+                self.on_registro_exitoso()
+            else:
+                messagebox.showerror("Error", "El nombre de usuario ya existe")
+        except ValueError as e:
+            messagebox.showerror("Error de Validación", str(e))

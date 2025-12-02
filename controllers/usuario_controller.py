@@ -51,6 +51,16 @@ class UsuarioController:
 
     def registrar_usuario(self, username, password, role='comprador') -> bool:
         """Registra un nuevo usuario."""
+        # Validaciones
+        if ' ' in username:
+            raise ValueError("El nombre de usuario no puede contener espacios.")
+        
+        if not username.replace('-', '').isalnum():
+             raise ValueError("El usuario solo puede contener letras, números y guiones.")
+
+        if set(username) == {'-'}:
+             raise ValueError("El usuario no puede ser solo guiones.")
+
         if username in self.usuarios:
             return False
         

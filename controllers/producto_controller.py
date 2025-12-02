@@ -46,16 +46,28 @@ class ProductoController:
     def _crear_productos_ejemplo(self):
         """Crea productos de ejemplo si no existen datos."""
         productos_ejemplo = [
-            Producto("001", "Arroz", 1500, 50, Categoria("Abarrotes"), Unidad("kilos"), 10),
+            Producto("001", "Arroz", 1500, 50, Categoria("Abarrotes"), Unidad("gramos"), 10),
             Producto("002", "Leche", 1200, 30, Categoria("Lácteos"), Unidad("unidades"), 5),
             Producto("003", "Pan", 800, 100, Categoria("Panadería"), Unidad("unidades"), 20),
-            Producto("004", "Manzanas", 2500, 4, Categoria("Frutas"), Unidad("kilos"), 5),
-            Producto("005", "Pollo", 5000, 15, Categoria("Carnes"), Unidad("kilos"), 5),
+            Producto("004", "Manzanas", 2500, 4, Categoria("Frutas"), Unidad("gramos"), 5),
+            Producto("005", "Pollo", 5000, 15, Categoria("Carnes"), Unidad("gramos"), 5),
         ]
         for producto in productos_ejemplo:
             self.productos[producto.codigo] = producto
         self.guardar_productos()
         print("✓ Productos de ejemplo creados")
+
+    def generar_codigo(self) -> str:
+        """Genera un código único para un nuevo producto."""
+        if not self.productos:
+            return "001"
+        
+        codigos = [int(c) for c in self.productos.keys() if c.isdigit()]
+        if not codigos:
+            return "001"
+            
+        nuevo_codigo = max(codigos) + 1
+        return f"{nuevo_codigo:03d}"
 
     def agregar_producto(self, producto: Producto) -> bool:
         """Agrega un nuevo producto al inventario."""
