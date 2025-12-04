@@ -37,6 +37,9 @@ class UsuarioController:
     def guardar_usuarios(self):
         """Persiste los usuarios en el archivo JSON."""
         try:
+            # Asegurar que el directorio existe
+            os.makedirs(os.path.dirname(self.archivo_usuarios), exist_ok=True)
+            
             usuarios_list = [u.to_dict() for u in self.usuarios.values()]
             with open(self.archivo_usuarios, 'w', encoding='utf-8') as f:
                 json.dump(usuarios_list, f, indent=2, ensure_ascii=False)

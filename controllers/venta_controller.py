@@ -40,6 +40,9 @@ class VentaController:
     def guardar_ventas(self):
         """Guarda el historial de ventas actualizado en el archivo JSON."""
         try:
+            # Asegurar que el directorio existe
+            os.makedirs(os.path.dirname(self.archivo_ventas), exist_ok=True)
+            
             with open(self.archivo_ventas, 'w', encoding='utf-8') as f:
                 json.dump(self.ventas, f, indent=2, ensure_ascii=False)
         except Exception as e:
@@ -70,22 +73,33 @@ class VentaController:
         3. Registra la venta.
         items: lista de tuplas (codigo_producto, cantidad)
         """
-        # Generar ID único para la venta
+        # 1. Agrupar items y validar cantidades
+        items_agrupados = {}
+        for codigo, cantidad in items:
+            if cantidad <= 0:
+                print(f"Error: Cantidad inválida ({cantidad}) para producto {codigo}")
+                return None
+            items_agrupados[codigo] = items_agrupados.get(codigo, 0) + cantidad
+
+        # 2. Validar stock total requerido antes de procesar nada (Atomicidad)
+        for codigo, cantidad_total in items_agrupados.items():
+            producto = self.producto_controller.productos.get(codigo)
+            if not producto:
+                print(f"Error: Producto {codigo} no encontrado.")
+                return None
+            if producto.stock < cantidad_total:
+                print(f"Stock insuficiente para {producto.nombre}. Requerido: {cantidad_total}, Disponible: {producto.stock}")
+                return None
+        
+        # 3. Generar ID y Objeto Venta
         nuevo_id = self.obtener_siguiente_id()
         venta = Venta(id_venta=nuevo_id)
         
-        # Validar stock antes de procesar (Transaccionalidad básica)
-        for codigo, cantidad in items:
-            producto = self.producto_controller.productos.get(codigo)
-            if not producto or producto.stock < cantidad:
-                print(f"Stock insuficiente para {producto.nombre if producto else 'producto desconocido'}.")
-                return None
-        
-        # Procesar la venta (Descontar stock y agregar items)
-        for codigo, cantidad in items:
+        # 4. Procesar la venta (Descontar stock y agregar items)
+        for codigo, cantidad_total in items_agrupados.items():
             producto = self.producto_controller.productos[codigo]
-            venta.agregar_item(producto, cantidad)
-            self.producto_controller.actualizar_stock(codigo, cantidad, 'restar')
+            venta.agregar_item(producto, cantidad_total)
+            self.producto_controller.actualizar_stock(codigo, cantidad_total, 'restar')
         
         self.ventas.append(venta.to_dict())
         self.guardar_ventas()

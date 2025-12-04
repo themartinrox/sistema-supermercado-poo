@@ -59,7 +59,7 @@
 
 **Diapositiva 10: Algoritmos de Generación Automática**
 *   **Ignacio:** "Uno de los desafíos lógicos fue la generación de identificadores únicos. Implementamos algoritmos de autoincremento tanto para las **Ventas** como para los **Productos**."
-*   **Ignacio:** "En `ProductoController`, el método `generar_codigo` escanea los códigos existentes (como '001', '002') y genera el siguiente automáticamente. Esto evita que el usuario tenga que inventar códigos y previene duplicados. Lo mismo aplicamos para los IDs de las boletas en `VentaController`, asegurando una numeración correlativa y consistente incluso al reiniciar el programa."
+*   **Ignacio:** "En `ProductoController`, el método `generar_codigo` escanea los códigos existentes (como '1', '2') y genera el siguiente automáticamente. Esto evita que el usuario tenga que inventar códigos y previene duplicados. Lo mismo aplicamos para los IDs de las boletas en `VentaController`, asegurando una numeración correlativa y consistente incluso al reiniciar el programa."
 
 **Diapositiva 11: Lógica de Venta y Validaciones**
 *   **Ignacio:** "El corazón del sistema es el método `realizar_venta`. Este método es transaccional. Recibe una lista de items y hace tres cosas críticas:"
@@ -75,7 +75,7 @@
 
 **Diapositiva 12: Funcionalidades Clave**
 *   **Diego:** "Para el usuario final, toda esa lógica se traduce en funcionalidades concretas. El sistema cuenta con:"
-    *   **Control de Acceso:** Tenemos roles diferenciados. Un vendedor no puede borrar productos ni crear administradores; solo un Admin puede hacerlo.
+    *   **Control de Acceso:** Tenemos roles diferenciados. Un comprador no puede borrar productos ni crear administradores; solo un Admin puede hacerlo.
     *   **Gestión de Inventario:** Permite crear, editar y eliminar productos, con soporte para **unidades y gramos**.
     *   **Integridad de Datos:** El sistema valida automáticamente que los stocks sean números enteros cuando corresponde y bloquea entradas inválidas en el registro de usuarios.
     *   **Punto de Venta (POS):** Es la pantalla principal de venta. Es rápida, permite buscar por nombre y calcula el total automáticamente.

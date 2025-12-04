@@ -107,13 +107,13 @@ class SupermercadoGUI:
     def init_inventario_admin(self):
         """Inicializa la pestaña de inventario para administradores."""
         # Controles
-        frame_controles = ttk.Frame(self.tab_inventario)
-        frame_controles.pack(fill=tk.X, pady=5)
-        ttk.Button(frame_controles, text="Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_controles, text="Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
+        self.frame_controles = ttk.Frame(self.tab_inventario)
+        self.frame_controles.pack(fill=tk.X, pady=5)
+        ttk.Button(self.frame_controles, text="Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
+        ttk.Button(self.frame_controles, text="Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
         
         # Búsqueda
         ttk.Label(self.frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
@@ -238,12 +238,10 @@ class SupermercadoGUI:
         codigo = selected[0]
         
         try:
-            cantidad = float(self.entry_cant_venta.get())
+            cantidad = int(float(self.entry_cant_venta.get()))
             producto = self.controller.productos[codigo]
             
             if cantidad <= 0: raise ValueError("Cantidad debe ser positiva.")
-            if producto.unidad == 'unidades' and not cantidad.is_integer():
-                raise ValueError("Producto se vende en unidades enteras.")
             if cantidad > producto.stock:
                 raise ValueError(f"Stock insuficiente. Disponible: {producto.stock}")
 
@@ -303,10 +301,24 @@ class SupermercadoGUI:
         self.lbl_stats_ingresos.pack(anchor=tk.W, pady=5)
         
         ttk.Separator(self.frame_stats).pack(fill=tk.X, pady=20)
-        ttk.Label(self.frame_stats, text="Últimas Ventas:", font=('Helvetica', 12, 'bold')).pack(anchor=tk.W)
+        ttk.Label(self.frame_stats, text="Últimas Ventas (Doble click para ver detalle):", font=('Helvetica', 12, 'bold')).pack(anchor=tk.W)
         
-        self.txt_log = tk.Text(self.frame_stats, height=15, state='disabled')
-        self.txt_log.pack(fill=tk.BOTH, expand=True, pady=10)
+        # Reemplazo de Text por Treeview para mejor interacción
+        cols = ('id', 'fecha', 'total', 'items')
+        self.tree_ventas = ttk.Treeview(self.frame_stats, columns=cols, show='headings', height=10)
+        self.tree_ventas.heading('id', text='ID')
+        self.tree_ventas.heading('fecha', text='Fecha')
+        self.tree_ventas.heading('total', text='Total')
+        self.tree_ventas.heading('items', text='Items')
+        
+        self.tree_ventas.column('id', width=50)
+        self.tree_ventas.column('fecha', width=150)
+        self.tree_ventas.column('total', width=100)
+        self.tree_ventas.column('items', width=50)
+        
+        self.tree_ventas.pack(fill=tk.BOTH, expand=True, pady=10)
+        self.tree_ventas.bind("<Double-1>", self.mostrar_detalle_venta)
+        
         self.actualizar_reportes()
 
     def actualizar_reportes(self):
@@ -316,12 +328,59 @@ class SupermercadoGUI:
         self.lbl_stats_ventas.config(text=f"Total Ventas: {stats['total_ventas']}")
         self.lbl_stats_ingresos.config(text=f"Ingresos Totales: ${stats['ingresos_totales']:,.0f}")
         
-        self.txt_log.config(state='normal')
-        self.txt_log.delete(1.0, tk.END)
-        for venta in reversed(self.controller.ventas[-10:]):
+        for item in self.tree_ventas.get_children():
+            self.tree_ventas.delete(item)
+            
+        for venta in reversed(self.controller.ventas):
             id_venta = venta.get('id', 'N/A')
-            self.txt_log.insert(tk.END, f"ID {id_venta} | Fecha {venta['fecha']} | Total: ${venta['total']:,.0f} | Items: {len(venta['items'])}\n")
-        self.txt_log.config(state='disabled')
+            self.tree_ventas.insert('', tk.END, iid=id_venta, values=(
+                id_venta, 
+                venta['fecha'], 
+                f"${venta['total']:,.0f}", 
+                len(venta['items'])
+            ))
+
+    def mostrar_detalle_venta(self, event):
+        """Muestra un popup con los detalles de la venta seleccionada."""
+        selected = self.tree_ventas.selection()
+        if not selected: return
+        
+        id_venta = selected[0]
+        # Buscar la venta por ID (como es string en el treeview, convertir si es necesario)
+        venta_data = next((v for v in self.controller.ventas if str(v.get('id')) == str(id_venta)), None)
+        
+        if not venta_data: return
+        
+        detalle = tk.Toplevel(self.root)
+        detalle.title(f"Detalle Venta #{id_venta}")
+        detalle.geometry("500x400")
+        
+        ttk.Label(detalle, text=f"Venta #{id_venta} - {venta_data['fecha']}", font=('Helvetica', 12, 'bold')).pack(pady=10)
+        
+        cols = ('producto', 'cantidad', 'precio', 'subtotal')
+        tree_det = ttk.Treeview(detalle, columns=cols, show='headings')
+        tree_det.heading('producto', text='Producto')
+        tree_det.heading('cantidad', text='Cant.')
+        tree_det.heading('precio', text='Precio Unit.')
+        tree_det.heading('subtotal', text='Subtotal')
+        
+        tree_det.column('producto', width=150)
+        tree_det.column('cantidad', width=60)
+        tree_det.column('precio', width=80)
+        tree_det.column('subtotal', width=80)
+        
+        tree_det.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        for item in venta_data['items']:
+            tree_det.insert('', tk.END, values=(
+                item['nombre'],
+                f"{int(item['cantidad'])} {item.get('unidad', '')}",
+                f"${item['precio_unitario']:,.0f}",
+                f"${item['subtotal']:,.0f}"
+            ))
+            
+        ttk.Label(detalle, text=f"TOTAL: ${venta_data['total']:,.0f}", font=('Helvetica', 12, 'bold')).pack(pady=10, padx=10, anchor=tk.E)
+        ttk.Button(detalle, text="Cerrar", command=detalle.destroy).pack(pady=10)
 
     # --- Pestaña de Alertas ---
     def init_alertas(self):
@@ -360,16 +419,16 @@ class SupermercadoGUI:
         
         entries = {}
         
-        # Código (Autogenerado)
-        row_frame = ttk.Frame(campos_frame)
-        row_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(row_frame, text="Código:", width=25).pack(side=tk.LEFT)
-        nuevo_codigo = self.controller.producto_controller.generar_codigo()
-        entry_codigo = ttk.Entry(row_frame)
-        entry_codigo.insert(0, nuevo_codigo)
-        entry_codigo.config(state='readonly')
-        entry_codigo.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        entries['codigo'] = entry_codigo
+        # Código (Oculto, se genera al guardar)
+        # row_frame = ttk.Frame(campos_frame)
+        # row_frame.pack(fill=tk.X, pady=5)
+        # ttk.Label(row_frame, text="Código:", width=25).pack(side=tk.LEFT)
+        # nuevo_codigo = self.controller.producto_controller.generar_codigo()
+        # entry_codigo = ttk.Entry(row_frame)
+        # entry_codigo.insert(0, nuevo_codigo)
+        # entry_codigo.config(state='readonly')
+        # entry_codigo.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # entries['codigo'] = entry_codigo
         
         # Nombre
         row_frame = ttk.Frame(campos_frame)
@@ -413,7 +472,7 @@ class SupermercadoGUI:
         ttk.Label(row_frame, text="Unidad:", width=25).pack(side=tk.LEFT)
         combo_unidad = ttk.Combobox(row_frame, state='readonly', values=["unidades", "gramos"])
         combo_unidad.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        combo_unidad.set("unidades")  # Valor por defecto
+        combo_unidad.set("gramos")  # Valor por defecto cambiado a gramos
         entries['unidad'] = combo_unidad
         
         # Stock Mínimo
@@ -427,12 +486,14 @@ class SupermercadoGUI:
         
         def guardar():
             try:
-                codigo = entries['codigo'].get().strip()
+                # Generar código automáticamente al guardar
+                codigo = self.controller.producto_controller.generar_codigo()
+                
                 nombre = entries['nombre'].get().strip()
                 categoria = entries['categoria'].get().strip()
                 unidad = entries['unidad'].get().strip().lower()
                 
-                if not codigo or not nombre or not categoria:
+                if not nombre or not categoria:
                     messagebox.showwarning("Error", "Todos los campos de texto son obligatorios")
                     return
 
@@ -449,19 +510,22 @@ class SupermercadoGUI:
                 if precio < 0:
                     raise ValueError("El precio no puede ser negativo")
 
-                stock = float(entries['stock'].get())
+                # Enforzar enteros para el stock (Gramos y Unidades se manejan en enteros)
+                try:
+                    stock = int(float(entries['stock'].get()))
+                except ValueError:
+                    raise ValueError("El stock debe ser un número entero")
+                
                 if stock < 0:
                     raise ValueError("El stock no puede ser negativo")
-                if unidad == 'unidades' and not stock.is_integer():
-                    messagebox.showerror("Error", "Para 'unidades', el stock debe ser un número entero")
-                    return
 
-                stock_min = float(entries['stock_minimo'].get())
+                try:
+                    stock_min = int(float(entries['stock_minimo'].get()))
+                except ValueError:
+                    raise ValueError("El stock mínimo debe ser un número entero")
+                
                 if stock_min < 0:
                     raise ValueError("El stock mínimo no puede ser negativo")
-                if unidad == 'unidades' and not stock_min.is_integer():
-                    messagebox.showerror("Error", "Para 'unidades', el stock mínimo debe ser entero")
-                    return
 
                 p = Producto(codigo, nombre, precio, stock, categoria, unidad, stock_min)
                 
@@ -470,7 +534,7 @@ class SupermercadoGUI:
                     cancelar()
                     self.cargar_inventario_admin()
                 else:
-                    messagebox.showerror("Error", "El código ya existe")
+                    messagebox.showerror("Error", "No se pudo agregar el producto.\nVerifique que el código o el nombre no existan ya.")
             except ValueError as e:
                 messagebox.showerror("Error", f"Valores inválidos: {str(e)}")
         
@@ -523,13 +587,10 @@ class SupermercadoGUI:
         
         def actualizar():
             try:
-                cant = float(entry_cant.get())
+                # Enforzar enteros para la cantidad
+                cant = int(float(entry_cant.get()))
                 if cant <= 0:
                     messagebox.showerror("Error", "La cantidad debe ser mayor a 0")
-                    return
-
-                if producto.unidad == 'unidades' and not cant.is_integer():
-                    messagebox.showerror("Error", f"El producto se maneja por unidades.\nNo se admiten decimales.")
                     return
 
                 if self.controller.actualizar_stock(codigo, cant, tipo_var.get()):

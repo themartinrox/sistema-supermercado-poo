@@ -40,6 +40,9 @@ class ProductoController:
     def guardar_productos(self):
         """Serializa el estado actual de los productos y lo escribe en el archivo JSON."""
         try:
+            # Asegurar que el directorio existe
+            os.makedirs(os.path.dirname(self.archivo_productos), exist_ok=True)
+            
             productos_list = [p.to_dict() for p in self.productos.values()]
             with open(self.archivo_productos, 'w', encoding='utf-8') as f:
                 json.dump(productos_list, f, indent=2, ensure_ascii=False)
@@ -49,11 +52,11 @@ class ProductoController:
     def _crear_productos_ejemplo(self):
         """Genera un set inicial de productos para demostración."""
         productos_ejemplo = [
-            Producto("001", "Arroz", 1500, 50, Categoria("Abarrotes"), Unidad("gramos"), 10),
-            Producto("002", "Leche", 1200, 30, Categoria("Lácteos"), Unidad("unidades"), 5),
-            Producto("003", "Pan", 800, 100, Categoria("Panadería"), Unidad("unidades"), 20),
-            Producto("004", "Manzanas", 2500, 4, Categoria("Frutas"), Unidad("gramos"), 5),
-            Producto("005", "Pollo", 5000, 15, Categoria("Carnes"), Unidad("gramos"), 5),
+            Producto("1", "Arroz", 1500, 50, Categoria("Abarrotes"), Unidad("gramos"), 10),
+            Producto("2", "Leche", 1200, 30, Categoria("Lácteos"), Unidad("unidades"), 5),
+            Producto("3", "Pan", 800, 100, Categoria("Panadería"), Unidad("unidades"), 20),
+            Producto("4", "Manzanas", 2500, 4, Categoria("Frutas"), Unidad("gramos"), 5),
+            Producto("5", "Pollo", 5000, 15, Categoria("Carnes"), Unidad("gramos"), 5),
         ]
         for producto in productos_ejemplo:
             self.productos[producto.codigo] = producto
@@ -63,23 +66,31 @@ class ProductoController:
     def generar_codigo(self) -> str:
         """Genera un código único para un nuevo producto."""
         if not self.productos:
-            return "001"
+            return "1"
         
         codigos = [int(c) for c in self.productos.keys() if c.isdigit()]
         if not codigos:
-            return "001"
+            return "1"
             
         nuevo_codigo = max(codigos) + 1
-        return f"{nuevo_codigo:03d}"
+        return str(nuevo_codigo)
 
     def agregar_producto(self, producto: Producto) -> bool:
         """
         Registra un nuevo producto en el sistema.
-        Retorna False si el código ya existe.
+        Retorna False si el código ya existe o si el nombre ya está en uso.
         """
+        # Validar código único
         if producto.codigo in self.productos:
             print(f"Ya existe un producto con el código {producto.codigo}")
             return False
+        
+        # Validar nombre único (case-insensitive)
+        nombre_nuevo = producto.nombre.strip().lower()
+        for p in self.productos.values():
+            if p.nombre.strip().lower() == nombre_nuevo:
+                print(f"Ya existe un producto con el nombre '{producto.nombre}'")
+                return False
         
         self.productos[producto.codigo] = producto
         self.guardar_productos()

@@ -50,6 +50,20 @@ class Application:
 
     def on_logout(self):
         """Callback para cerrar sesión y volver al login."""
+        self.show_login_window()
+
+    def _clear_widgets(self):
+        """Elimina todos los widgets de la ventana principal."""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Application(root)
+    root.mainloop()
+
+    def on_logout(self):
+        """Callback para cerrar sesión y volver al login."""
         self._clear_widgets()
         self.show_login_window()
 
