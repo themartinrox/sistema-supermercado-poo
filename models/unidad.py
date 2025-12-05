@@ -11,7 +11,9 @@ class Unidad:
         abreviatura (str): Abreviatura común (ej. "kg").
     """
     def __init__(self, nombre: str, abreviatura: str = ""):
+        # Nombre descriptivo de la unidad
         self.nombre = nombre
+        # Abreviatura corta para visualización
         self.abreviatura = abreviatura
 
     def to_dict(self) -> dict:
@@ -27,10 +29,12 @@ class Unidad:
         Crea una instancia de Unidad desde un diccionario o string.
         Maneja compatibilidad con versiones anteriores donde unidad era solo un string.
         """
-        # Soporte para cuando la unidad era solo un string
+        # Soporte para cuando la unidad era solo un string (migración de datos antiguos)
         if isinstance(data, str):
             return Unidad(data)
+        # Creación estándar desde diccionario
         return Unidad(data['nombre'], data.get('abreviatura', ''))
 
     def __str__(self):
+        # Retorna el nombre de la unidad como representación en string
         return self.nombre

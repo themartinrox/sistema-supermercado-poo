@@ -15,6 +15,7 @@ class SupermercadoGUI:
     Maneja las pestañas y la interacción del usuario con el sistema.
     """
     def __init__(self, root, usuario: Usuario, controller: SupermercadoController, on_logout):
+        # Referencias principales
         self.root = root
         self.usuario = usuario
         self.controller = controller
@@ -24,12 +25,15 @@ class SupermercadoGUI:
         self.root.title(f"Supermercado - {self.usuario.username} ({self.usuario.role})")
         self.root.geometry("1024x768")
         
+        # Configuración de estilos visuales
         self.style = ttk.Style()
         self.style.theme_use('clam')
         
+        # Contenedor principal con padding
         self.main_container = ttk.Frame(self.root)
         self.main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
+        # Inicialización de componentes
         self._setup_header()
         self._setup_notebook()
         
@@ -41,10 +45,12 @@ class SupermercadoGUI:
         frame_header = ttk.Frame(self.main_container)
         frame_header.pack(fill=tk.X, pady=5)
         
+        # Título dinámico según el rol
         titulo_texto = "Supermercado Manager" if self.usuario.role == 'admin' else "Supermercado - Compras"
         lbl_titulo = ttk.Label(frame_header, text=titulo_texto, font=('Helvetica', 18, 'bold'))
         lbl_titulo.pack(side=tk.LEFT, pady=(0, 10))
 
+        # Botones de acción global
         ttk.Button(frame_header, text="Cerrar Sesión", command=self.cerrar_sesion).pack(side=tk.RIGHT)
         ttk.Button(frame_header, text="Recargar Datos", command=self.recargar_datos).pack(side=tk.RIGHT, padx=5)
 
@@ -53,6 +59,7 @@ class SupermercadoGUI:
         self.notebook = ttk.Notebook(self.main_container)
         self.notebook.pack(fill=tk.BOTH, expand=True)
         
+        # Frames base para las pestañas
         self.tab_inventario = ttk.Frame(self.notebook)
         self.tab_ventas = ttk.Frame(self.notebook)
         
@@ -61,17 +68,19 @@ class SupermercadoGUI:
             self.tab_reportes = ttk.Frame(self.notebook)
             self.tab_alertas = ttk.Frame(self.notebook)
             
+            # Agrega pestañas al notebook
             self.notebook.add(self.tab_inventario, text="Inventario")
             self.notebook.add(self.tab_ventas, text="Ventas")
             self.notebook.add(self.tab_reportes, text="Reportes")
             self.notebook.add(self.tab_alertas, text="Alertas")
             
+            # Inicializa el contenido de cada pestaña
             self.init_inventario_admin()
             self.init_ventas()
             self.init_reportes()
             self.init_alertas()
         else: # Comprador
-            # Pestañas para comprador
+            # Pestañas para comprador (orden diferente para priorizar la compra)
             self.notebook.add(self.tab_ventas, text="Comprar")
             self.notebook.add(self.tab_inventario, text="Catálogo")
             
@@ -79,18 +88,22 @@ class SupermercadoGUI:
             self.init_inventario_comprador()
 
     def recargar_datos(self):
+        """Fuerza una recarga de datos desde los archivos JSON."""
         if messagebox.askyesno("Confirmar", "Recargar datos desde el archivo?"):
             self.controller.cargar_datos()
-            self.on_tab_change() # Refresh current tab
+            self.on_tab_change() # Refresca la pestaña actual
             messagebox.showinfo("Éxito", "Datos actualizados.")
 
     def cerrar_sesion(self):
+        """Ejecuta el callback de logout."""
         self.on_logout()
 
     def on_tab_change(self, event=None):
+        """Manejador de evento de cambio de pestaña. Actualiza los datos visibles."""
         selected_tab_index = self.notebook.index(self.notebook.select())
         tab_text = self.notebook.tab(selected_tab_index, "text")
         
+        # Lógica de actualización selectiva según la pestaña activa
         if "Inventario" in tab_text or "Catálogo" in tab_text:
             if self.usuario.role == 'admin':
                 self.cargar_inventario_admin()
@@ -106,47 +119,66 @@ class SupermercadoGUI:
     # --- Pestaña de Inventario (Admin) ---
     def init_inventario_admin(self):
         """Inicializa la pestaña de inventario para administradores."""
-        # Controles
+        # Frame para botones de acción y búsqueda
         self.frame_controles = ttk.Frame(self.tab_inventario)
         self.frame_controles.pack(fill=tk.X, pady=5)
+        
+        # Botones de gestión de inventario
         ttk.Button(self.frame_controles, text="Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
         ttk.Button(self.frame_controles, text="Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
         ttk.Button(self.frame_controles, text="Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
         ttk.Button(self.frame_controles, text="Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
         ttk.Button(self.frame_controles, text="Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
         
-        # Búsqueda
+        # Campo de búsqueda en tiempo real
         ttk.Label(self.frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
         self.entry_buscar_inv = ttk.Entry(self.frame_controles)
         self.entry_buscar_inv.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        # Vincula el evento de soltar tecla para filtrar automáticamente
         self.entry_buscar_inv.bind('<KeyRelease>', lambda e: self.cargar_inventario_admin())
         
-        # Tabla de productos
+        # Configuración de la tabla (Treeview)
         columns = ('codigo', 'nombre', 'precio', 'stock', 'unidad', 'categoria', 'estado')
         self.tree_inv = ttk.Treeview(self.tab_inventario, columns=columns, show='headings')
+        
+        # Configura encabezados
         for col in columns:
             self.tree_inv.heading(col, text=col.capitalize())
+        
         self.tree_inv.pack(fill=tk.BOTH, expand=True)
+        # Carga inicial de datos
         self.cargar_inventario_admin()
 
     def cargar_inventario_admin(self):
         """Carga y muestra los productos en la tabla de inventario."""
+        # Limpia la tabla actual
         for item in self.tree_inv.get_children():
             self.tree_inv.delete(item)
         
+        # Obtiene el término de búsqueda
         termino = self.entry_buscar_inv.get()
         # Filtra si hay término de búsqueda, sino muestra todo
         productos = self.controller.buscar_producto(termino) if termino else self.controller.productos.values()
         
         for p in sorted(productos, key=lambda x: x.nombre):
+            # Determina el estado visual del stock
             estado = "BAJO" if p.tiene_stock_bajo() else "OK"
             if p.stock == 0: estado = "AGOTADO"
+            
+            # Formatear stock según unidad (1 decimal para kg, enteros para otros)
+            if p.unidad == 'kg':
+                stock_display = f"{p.stock:.1f}"
+            else:
+                stock_display = f"{int(p.stock)}"
+                
+            # Inserta la fila en la tabla
             self.tree_inv.insert('', tk.END, iid=p.codigo, values=(
-                p.codigo, p.nombre, f"${p.precio:,.0f}", int(p.stock), p.unidad, p.categoria, estado
+                p.codigo, p.nombre, f"${p.precio:,.0f}", stock_display, p.unidad, p.categoria, estado
             ))
 
     # --- Pestaña de Inventario (Comprador) ---
     def init_inventario_comprador(self):
+        """Inicializa la vista de catálogo para compradores."""
         # Búsqueda
         frame_controles = ttk.Frame(self.tab_inventario)
         frame_controles.pack(fill=tk.X, pady=5)
@@ -155,7 +187,7 @@ class SupermercadoGUI:
         self.entry_buscar_cat.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         self.entry_buscar_cat.bind('<KeyRelease>', lambda e: self.cargar_inventario_comprador())
 
-        # Tabla
+        # Tabla de catálogo (simplificada para el cliente)
         columns = ('nombre', 'precio', 'stock', 'categoria')
         self.tree_cat = ttk.Treeview(self.tab_inventario, columns=columns, show='headings')
         for col in columns:
@@ -164,6 +196,7 @@ class SupermercadoGUI:
         self.cargar_inventario_comprador()
 
     def cargar_inventario_comprador(self):
+        """Carga los productos en el catálogo del comprador."""
         for item in self.tree_cat.get_children():
             self.tree_cat.delete(item)
             
@@ -171,13 +204,20 @@ class SupermercadoGUI:
         productos = self.controller.buscar_producto(termino) if termino else self.controller.productos.values()
 
         for p in sorted(productos, key=lambda x: x.nombre):
+            # Formatear stock según unidad para visualización amigable
+            if p.unidad == 'kg':
+                stock_display = f"{p.stock:.1f} {p.unidad}"
+            else:
+                stock_display = f"{int(p.stock)} {p.unidad}"
+
             self.tree_cat.insert('', tk.END, values=(
-                p.nombre, f"${p.precio:,.0f}", f"{int(p.stock)} {p.unidad}", p.categoria
+                p.nombre, f"${p.precio:,.0f}", stock_display, p.categoria
             ))
 
     # --- Pestaña de Ventas ---
     def init_ventas(self):
         """Inicializa la interfaz de ventas (POS)."""
+        # Panel dividido: Izquierda (Productos), Derecha (Carrito)
         paned = ttk.PanedWindow(self.tab_ventas, orient=tk.HORIZONTAL)
         paned.pack(fill=tk.BOTH, expand=True)
         
@@ -221,15 +261,22 @@ class SupermercadoGUI:
 
     def cargar_productos_venta(self):
         """Carga los productos disponibles para la venta (stock > 0)."""
+        # Limpia la lista de productos
         for item in self.tree_venta_prod.get_children():
             self.tree_venta_prod.delete(item)
         
+        # Filtra productos disponibles
         termino = self.entry_buscar_venta.get()
         productos = self.controller.buscar_producto(termino) if termino else self.controller.obtener_productos_disponibles()
         
         for p in sorted(productos, key=lambda x: x.nombre):
             if p.stock > 0:
-                self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", int(p.stock)))
+                # Formatear stock según unidad
+                if p.unidad == 'kg':
+                    stock_display = f"{p.stock:.1f}"
+                else:
+                    stock_display = f"{int(p.stock)}"
+                self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", stock_display))
 
     def agregar_al_carrito(self):
         """Agrega el producto seleccionado al carrito de compras."""
@@ -238,10 +285,23 @@ class SupermercadoGUI:
         codigo = selected[0]
         
         try:
-            cantidad = int(float(self.entry_cant_venta.get()))
+            # Obtiene la cantidad ingresada
+            cantidad_val = float(self.entry_cant_venta.get())
             producto = self.controller.productos[codigo]
             
-            if cantidad <= 0: raise ValueError("Cantidad debe ser positiva.")
+            if cantidad_val <= 0: raise ValueError("Cantidad debe ser positiva.")
+            
+            # Validación específica por tipo de unidad
+            if producto.unidad == 'kg':
+                # Para kg permitimos 1 decimal
+                cantidad = round(cantidad_val, 1)
+            else:
+                # Para unidades discretas, debe ser entero
+                if not cantidad_val.is_integer():
+                    raise ValueError(f"Producto se vende en {producto.unidad} enteras.")
+                cantidad = int(cantidad_val)
+
+            # Verifica stock disponible
             if cantidad > producto.stock:
                 raise ValueError(f"Stock insuficiente. Disponible: {producto.stock}")
 
@@ -254,16 +314,26 @@ class SupermercadoGUI:
 
     def actualizar_carrito_y_total(self):
         """Refresca la vista del carrito y recalcula el total."""
+        # Limpia la tabla del carrito
         for item in self.tree_cart.get_children():
             self.tree_cart.delete(item)
         
         total = 0
+        # Recorre los items en el carrito para calcular subtotales
         for codigo, cantidad in self.carrito_items.items():
             producto = self.controller.productos[codigo]
             subtotal = producto.precio * cantidad
             total += subtotal
-            self.tree_cart.insert('', tk.END, values=(producto.nombre, int(cantidad), f"${subtotal:,.0f}"))
+            
+            # Formato de cantidad según unidad
+            if producto.unidad == 'kg':
+                cant_display = f"{cantidad:.1f}"
+            else:
+                cant_display = f"{int(cantidad)}"
+                
+            self.tree_cart.insert('', tk.END, values=(producto.nombre, cant_display, f"${subtotal:,.0f}"))
         
+        # Actualiza la etiqueta del total
         self.lbl_total.config(text=f"TOTAL: ${total:,.0f}")
 
     def limpiar_carrito(self):
@@ -276,10 +346,13 @@ class SupermercadoGUI:
         if not self.carrito_items: return
         
         items_venta = list(self.carrito_items.items())
+        # Confirmación de usuario
         if messagebox.askyesno("Confirmar", f"Proceder con la venta por {self.lbl_total['text']}?"):
+            # Llama al controlador para procesar la transacción
             venta = self.controller.realizar_venta(items_venta)
             if venta:
                 messagebox.showinfo("Éxito", f"Venta realizada! ID: {venta.id}\nTotal: ${venta.total:,.0f}")
+                # Limpia y actualiza la vista
                 self.limpiar_carrito()
                 self.cargar_productos_venta()
             else:
@@ -291,6 +364,7 @@ class SupermercadoGUI:
         self.frame_stats = ttk.Frame(self.tab_reportes, padding=20)
         self.frame_stats.pack(fill=tk.BOTH, expand=True)
         
+        # Etiquetas para métricas generales
         self.lbl_stats_prod = ttk.Label(self.frame_stats, font=('Helvetica', 12))
         self.lbl_stats_prod.pack(anchor=tk.W, pady=5)
         
@@ -303,7 +377,7 @@ class SupermercadoGUI:
         ttk.Separator(self.frame_stats).pack(fill=tk.X, pady=20)
         ttk.Label(self.frame_stats, text="Últimas Ventas (Doble click para ver detalle):", font=('Helvetica', 12, 'bold')).pack(anchor=tk.W)
         
-        # Reemplazo de Text por Treeview para mejor interacción
+        # Tabla de historial de ventas
         cols = ('id', 'fecha', 'total', 'items')
         self.tree_ventas = ttk.Treeview(self.frame_stats, columns=cols, show='headings', height=10)
         self.tree_ventas.heading('id', text='ID')
@@ -317,12 +391,14 @@ class SupermercadoGUI:
         self.tree_ventas.column('items', width=50)
         
         self.tree_ventas.pack(fill=tk.BOTH, expand=True, pady=10)
+        # Vincula doble click para ver detalles de una venta específica
         self.tree_ventas.bind("<Double-1>", self.mostrar_detalle_venta)
         
         self.actualizar_reportes()
 
     def actualizar_reportes(self):
         """Calcula y muestra las estadísticas actualizadas."""
+        # Obtiene datos agregados del controlador
         stats = self.controller.obtener_estadisticas()
         self.lbl_stats_prod.config(text=f"Total Productos: {stats['total_productos']} (Valor: ${stats['valor_inventario']:,.0f})")
         self.lbl_stats_ventas.config(text=f"Total Ventas: {stats['total_ventas']}")
@@ -351,12 +427,14 @@ class SupermercadoGUI:
         
         if not venta_data: return
         
+        # Crea ventana emergente (Toplevel)
         detalle = tk.Toplevel(self.root)
         detalle.title(f"Detalle Venta #{id_venta}")
         detalle.geometry("500x400")
         
         ttk.Label(detalle, text=f"Venta #{id_venta} - {venta_data['fecha']}", font=('Helvetica', 12, 'bold')).pack(pady=10)
         
+        # Tabla de detalle de items
         cols = ('producto', 'cantidad', 'precio', 'subtotal')
         tree_det = ttk.Treeview(detalle, columns=cols, show='headings')
         tree_det.heading('producto', text='Producto')
@@ -372,9 +450,15 @@ class SupermercadoGUI:
         tree_det.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         
         for item in venta_data['items']:
+            # Formato condicional para cantidad en el detalle histórico
+            if item.get('unidad') == 'kg':
+                cant_display = f"{item['cantidad']:.1f}"
+            else:
+                cant_display = f"{int(item['cantidad'])}"
+
             tree_det.insert('', tk.END, values=(
                 item['nombre'],
-                f"{int(item['cantidad'])} {item.get('unidad', '')}",
+                f"{cant_display} {item.get('unidad', '')}",
                 f"${item['precio_unitario']:,.0f}",
                 f"${item['subtotal']:,.0f}"
             ))
@@ -386,24 +470,37 @@ class SupermercadoGUI:
     def init_alertas(self):
         """Inicializa la vista de alertas de stock bajo."""
         ttk.Label(self.tab_alertas, text="Productos con Stock Crítico", font=('Helvetica', 14, 'bold'), foreground='red').pack(pady=10)
+        
+        # Tabla de alertas
         cols = ('codigo', 'nombre', 'stock', 'minimo')
         self.tree_alertas = ttk.Treeview(self.tab_alertas, columns=cols, show='headings')
         for col in cols: self.tree_alertas.heading(col, text=col.capitalize())
         self.tree_alertas.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
         ttk.Button(self.tab_alertas, text="Actualizar", command=self.cargar_alertas).pack(pady=10)
         self.cargar_alertas()
 
     def cargar_alertas(self):
         """Filtra y muestra solo los productos con stock bajo."""
+        # Limpia la tabla
         for item in self.tree_alertas.get_children():
             self.tree_alertas.delete(item)
+            
+        # Obtiene productos críticos desde el controlador
         for p in self.controller.obtener_productos_stock_bajo():
-            self.tree_alertas.insert('', tk.END, values=(p.codigo, p.nombre, int(p.stock), int(p.stock_minimo)))
+            # Formatear stock según unidad
+            if p.unidad == 'kg':
+                stock_display = f"{p.stock:.1f}"
+                min_display = f"{p.stock_minimo:.1f}"
+            else:
+                stock_display = f"{int(p.stock)}"
+                min_display = f"{int(p.stock_minimo)}"
+            self.tree_alertas.insert('', tk.END, values=(p.codigo, p.nombre, stock_display, min_display))
 
     # --- Diálogos ---
     def mostrar_dialogo_producto(self):
         """Muestra formulario para agregar producto en la misma ventana"""
-        # Ocultar la tabla y controles temporalmente
+        # Ocultar la tabla y controles temporalmente para mostrar el formulario
         self.tree_inv.pack_forget()
         self.frame_controles.pack_forget()
         
@@ -470,20 +567,20 @@ class SupermercadoGUI:
         row_frame = ttk.Frame(campos_frame)
         row_frame.pack(fill=tk.X, pady=5)
         ttk.Label(row_frame, text="Unidad:", width=25).pack(side=tk.LEFT)
-        combo_unidad = ttk.Combobox(row_frame, state='readonly', values=["unidades", "gramos"])
+        combo_unidad = ttk.Combobox(row_frame, state='readonly', values=["unidades", "kg"])
         combo_unidad.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        combo_unidad.set("gramos")  # Valor por defecto cambiado a gramos
+        combo_unidad.set("kg")  # Valor por defecto cambiado a kg
         entries['unidad'] = combo_unidad
 
         # Evento para cambiar unidades según categoría
         def on_categoria_change(event):
             cat = combo_categoria.get()
             if cat == "Bebidas":
-                combo_unidad['values'] = ["unidades", "gramos", "mL"]
+                combo_unidad['values'] = ["unidades", "kg", "mL"]
             else:
-                combo_unidad['values'] = ["unidades", "gramos"]
+                combo_unidad['values'] = ["unidades", "kg"]
                 if combo_unidad.get() == "mL":
-                    combo_unidad.set("gramos")
+                    combo_unidad.set("kg")
         
         combo_categoria.bind("<<ComboboxSelected>>", on_categoria_change)
         
@@ -521,27 +618,36 @@ class SupermercadoGUI:
                      messagebox.showwarning("Error", "El nombre del producto debe contener al menos una letra.")
                      return
 
-                if unidad not in ['unidades', 'gramos', 'mL']:
-                    messagebox.showwarning("Error", "La unidad debe ser 'unidades', 'gramos' o 'mL'")
+                if unidad not in ['unidades', 'kg', 'mL']:
+                    messagebox.showwarning("Error", "La unidad debe ser 'unidades', 'kg' o 'mL'")
                     return
 
                 precio = int(entries['precio'].get())
                 if precio < 0:
                     raise ValueError("El precio no puede ser negativo")
 
-                # Enforzar enteros para el stock (Gramos, Unidades y mL se manejan en enteros)
+                # Enforzar enteros para el stock (Unidades y mL se manejan en enteros)
+                # Para kg permitimos decimales (1 decimal)
                 try:
-                    stock = int(float(entries['stock'].get()))
+                    stock_val = float(entries['stock'].get())
+                    if unidad == 'kg':
+                        stock = round(stock_val, 1)
+                    else:
+                        stock = int(stock_val)
                 except ValueError:
-                    raise ValueError("El stock debe ser un número entero")
+                    raise ValueError("El stock debe ser un número válido")
                 
                 if stock < 0:
                     raise ValueError("El stock no puede ser negativo")
 
                 try:
-                    stock_min = int(float(entries['stock_minimo'].get()))
+                    stock_min_val = float(entries['stock_minimo'].get())
+                    if unidad == 'kg':
+                        stock_min = round(stock_min_val, 1)
+                    else:
+                        stock_min = int(stock_min_val)
                 except ValueError:
-                    raise ValueError("El stock mínimo debe ser un número entero")
+                    raise ValueError("El stock mínimo debe ser un número válido")
                 
                 if stock_min < 0:
                     raise ValueError("El stock mínimo no puede ser negativo")
@@ -588,7 +694,13 @@ class SupermercadoGUI:
         
         ttk.Label(form_frame, text=f"Actualizar Stock", font=('Helvetica', 14, 'bold')).pack(pady=10)
         ttk.Label(form_frame, text=f"Producto: {producto.nombre}", font=('Helvetica', 12)).pack(pady=5)
-        ttk.Label(form_frame, text=f"Stock actual: {int(producto.stock)} {producto.unidad}", font=('Helvetica', 10)).pack(pady=5)
+        
+        if producto.unidad == 'kg':
+            stock_str = f"{producto.stock:.1f}"
+        else:
+            stock_str = f"{int(producto.stock)}"
+            
+        ttk.Label(form_frame, text=f"Stock actual: {stock_str} {producto.unidad}", font=('Helvetica', 10)).pack(pady=5)
         
         # Frame para opciones
         opciones_frame = ttk.Frame(form_frame)
@@ -606,16 +718,28 @@ class SupermercadoGUI:
         
         def actualizar():
             try:
-                # Enforzar enteros para la cantidad
-                cant = int(float(entry_cant.get()))
-                if cant <= 0:
+                # Enforzar enteros para la cantidad, excepto si es kg
+                cant_val = float(entry_cant.get())
+                if cant_val <= 0:
                     messagebox.showerror("Error", "La cantidad debe ser mayor a 0")
                     return
+
+                if producto.unidad == 'kg':
+                    cant = round(cant_val, 1)
+                else:
+                    if not cant_val.is_integer():
+                         messagebox.showerror("Error", f"El producto se maneja por {producto.unidad}.\nNo se admiten decimales.")
+                         return
+                    cant = int(cant_val)
 
                 if self.controller.actualizar_stock(codigo, cant, tipo_var.get()):
                     prod = self.controller.productos[codigo]
                     if prod.tiene_stock_bajo():
-                        messagebox.showwarning("Alerta de Stock", f"El producto '{prod.nombre}' tiene stock bajo: {prod.stock} {prod.unidad}")
+                        if prod.unidad == 'kg':
+                            stock_msg = f"{prod.stock:.1f}"
+                        else:
+                            stock_msg = f"{int(prod.stock)}"
+                        messagebox.showwarning("Alerta de Stock", f"El producto '{prod.nombre}' tiene stock bajo: {stock_msg} {prod.unidad}")
                     else:
                         messagebox.showinfo("Éxito", "Stock actualizado correctamente")
                     

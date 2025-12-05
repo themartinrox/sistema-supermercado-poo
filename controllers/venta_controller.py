@@ -17,9 +17,13 @@ class VentaController:
     """
     
     def __init__(self, producto_controller: ProductoController, archivo_ventas: str = 'data/ventas.json'):
+        # Ruta del archivo de persistencia de ventas
         self.archivo_ventas = archivo_ventas
-        self.producto_controller = producto_controller # Dependencia para validar stock
+        # Inyección de dependencia: Necesitamos el controlador de productos para validar y descontar stock
+        self.producto_controller = producto_controller 
+        # Lista en memoria para almacenar el historial de ventas
         self.ventas: List[dict] = []
+        # Carga inicial
         self.cargar_ventas()
 
     def cargar_ventas(self):
@@ -57,7 +61,6 @@ class VentaController:
             return 1
         
         # Buscar el ID máximo actual. Asumimos que las ventas tienen 'id'.
-        # Si hay ventas antiguas sin ID, las ignoramos o asumimos 0.
         max_id = 0
         for v in self.ventas:
             v_id = v.get('id')
@@ -73,7 +76,7 @@ class VentaController:
         3. Registra la venta.
         items: lista de tuplas (codigo_producto, cantidad)
         """
-        # 1. Agrupar items y validar cantidades
+        # 1. Agrupar items y validar cantidades (por si el mismo producto aparece varias veces)
         items_agrupados = {}
         for codigo, cantidad in items:
             if cantidad <= 0:
@@ -82,6 +85,7 @@ class VentaController:
             items_agrupados[codigo] = items_agrupados.get(codigo, 0) + cantidad
 
         # 2. Validar stock total requerido antes de procesar nada (Atomicidad)
+        # Si falta stock de UN solo producto, la venta completa falla.
         for codigo, cantidad_total in items_agrupados.items():
             producto = self.producto_controller.productos.get(codigo)
             if not producto:
@@ -98,6 +102,16 @@ class VentaController:
         # 4. Procesar la venta (Descontar stock y agregar items)
         for codigo, cantidad_total in items_agrupados.items():
             producto = self.producto_controller.productos[codigo]
+            # Descuenta el stock usando el controlador de productos
+            self.producto_controller.actualizar_stock(codigo, cantidad_total, operacion='restar')
+            # Agrega el item al registro de la venta
+            venta.agregar_item(producto, cantidad_total)
+        
+        # 5. Guardar la venta en el historial
+        self.ventas.append(venta.to_dict())
+        self.guardar_ventas()
+        print(f"Venta #{venta.id} realizada con éxito. Total: ${venta.total}")
+        return venta
             venta.agregar_item(producto, cantidad_total)
             self.producto_controller.actualizar_stock(codigo, cantidad_total, 'restar')
         

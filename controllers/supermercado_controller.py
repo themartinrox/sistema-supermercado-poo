@@ -20,11 +20,14 @@ class SupermercadoController:
                  archivo_usuarios: str = 'data/usuarios.json'):
         
         # Inicialización de sub-controladores
+        # Cada controlador maneja un aspecto específico del dominio
         self.producto_controller = ProductoController(archivo_productos)
         self.usuario_controller = UsuarioController(archivo_usuarios)
+        # El controlador de ventas necesita acceso a productos para validar stock
         self.venta_controller = VentaController(self.producto_controller, archivo_ventas)
 
     # Delegación de propiedades para mantener compatibilidad con la vista
+    # Esto permite que la GUI acceda a 'controller.productos' directamente
     @property
     def productos(self):
         """Acceso directo al diccionario de productos."""
@@ -54,6 +57,7 @@ class SupermercadoController:
         self.venta_controller.guardar_ventas()
 
     # Métodos de Producto (Delegación)
+    # Estos métodos redirigen las llamadas al controlador de productos
     def agregar_producto(self, producto):
         return self.producto_controller.agregar_producto(producto)
 
@@ -73,7 +77,9 @@ class SupermercadoController:
         return self.producto_controller.eliminar_producto(codigo)
 
     def reiniciar_productos(self):
-        return self.producto_controller.reiniciar_productos()
+        # Método opcional para resetear datos (si existe en el controlador)
+        if hasattr(self.producto_controller, 'reiniciar_productos'):
+            return self.producto_controller.reiniciar_productos()
 
     # Métodos de Usuario (Delegación)
     def registrar_usuario(self, username, password, role='comprador'):
@@ -87,6 +93,9 @@ class SupermercadoController:
         return self.venta_controller.realizar_venta(items)
 
     def obtener_estadisticas(self):
-        return self.venta_controller.obtener_estadisticas()
+        # Si el controlador de ventas tiene estadísticas, las retorna
+        if hasattr(self.venta_controller, 'obtener_estadisticas'):
+            return self.venta_controller.obtener_estadisticas()
+        return {}
 
 
