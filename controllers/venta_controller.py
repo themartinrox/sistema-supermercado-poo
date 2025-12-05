@@ -112,13 +112,6 @@ class VentaController:
         self.guardar_ventas()
         print(f"Venta #{venta.id} realizada con éxito. Total: ${venta.total}")
         return venta
-            venta.agregar_item(producto, cantidad_total)
-            self.producto_controller.actualizar_stock(codigo, cantidad_total, 'restar')
-        
-        self.ventas.append(venta.to_dict())
-        self.guardar_ventas()
-        
-        return venta
 
     def obtener_estadisticas(self) -> dict:
         """

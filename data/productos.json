@@ -3,10 +3,10 @@
     "codigo": "1",
     "nombre": "Arroz",
     "precio": 1500,
-    "stock": 1050,
+    "stock": 50.0,
     "categoria": "Abarrotes",
-    "unidad": "gramos",
-    "stock_minimo": 10
+    "unidad": "kg",
+    "stock_minimo": 10.0
   },
   {
     "codigo": "2",
@@ -18,30 +18,30 @@
     "stock_minimo": 5
   },
   {
+    "codigo": "3",
+    "nombre": "Pan",
+    "precio": 800,
+    "stock": 100,
+    "categoria": "Panadería",
+    "unidad": "unidades",
+    "stock_minimo": 20
+  },
+  {
     "codigo": "4",
     "nombre": "Manzanas",
     "precio": 2500,
-    "stock": 10004,
+    "stock": 20.5,
     "categoria": "Frutas",
-    "unidad": "gramos",
-    "stock_minimo": 5
+    "unidad": "kg",
+    "stock_minimo": 5.0
   },
   {
     "codigo": "5",
     "nombre": "Pollo",
     "precio": 5000,
-    "stock": 1015,
+    "stock": 15.0,
     "categoria": "Carnes",
-    "unidad": "gramos",
-    "stock_minimo": 5
-  },
-  {
-    "codigo": "6",
-    "nombre": "coca cola 3 l",
-    "precio": 1000,
-    "stock": 10,
-    "categoria": "Bebidas",
-    "unidad": "unidades",
-    "stock_minimo": 5
+    "unidad": "kg",
+    "stock_minimo": 5.0
   }
 ]

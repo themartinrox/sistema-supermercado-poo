@@ -74,20 +74,3 @@ class Usuario:
             bool: True si el rol es 'admin', False en caso contrario.
         """
         return self.role == 'admin'
-        Genera una instancia de Usuario a partir de un diccionario previamente
-        obtenido desde una fuente externa, como un archivo JSON o una base de datos.
-
-        Args:
-            data (dict): Diccionario que contiene los valores necesarios para
-                         reconstruir un usuario. Se espera que incluya al menos
-                         'username' y 'password'. Si no contiene 'role', se
-                         asignará 'comprador' por defecto.
-
-        Returns:
-            Usuario: Nueva instancia creada con los datos proporcionados.
-        """
-        return Usuario(
-            data['username'],
-            data['password'],
-            data.get('role', 'comprador')
-        )
