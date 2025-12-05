@@ -5,13 +5,8 @@
     "role": "admin"
   },
   {
-    "username": "     ",
-    "password": "    ",
-    "role": "comprador"
-  },
-  {
-    "username": "@!\"#$%&/",
-    "password": "Q!\"#$%",
-    "role": "comprador"
+    "username": "user1",
+    "password": "user123",
+    "role": "user"
   }
 ]

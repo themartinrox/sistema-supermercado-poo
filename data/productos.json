@@ -1,15 +1,15 @@
 [
   {
-    "codigo": "001",
+    "codigo": "1",
     "nombre": "Arroz",
     "precio": 1500,
     "stock": 50,
     "categoria": "Abarrotes",
-    "unidad": "kilos",
+    "unidad": "gramos",
     "stock_minimo": 10
   },
   {
-    "codigo": "002",
+    "codigo": "2",
     "nombre": "Leche",
     "precio": 1200,
     "stock": 30,
@@ -18,7 +18,7 @@
     "stock_minimo": 5
   },
   {
-    "codigo": "003",
+    "codigo": "3",
     "nombre": "Pan",
     "precio": 800,
     "stock": 100,
@@ -27,21 +27,21 @@
     "stock_minimo": 20
   },
   {
-    "codigo": "004",
+    "codigo": "4",
     "nombre": "Manzanas",
     "precio": 2500,
     "stock": 4,
     "categoria": "Frutas",
-    "unidad": "kilos",
+    "unidad": "gramos",
     "stock_minimo": 5
   },
   {
-    "codigo": "005",
+    "codigo": "5",
     "nombre": "Pollo",
     "precio": 5000,
     "stock": 15,
     "categoria": "Carnes",
-    "unidad": "kilos",
+    "unidad": "gramos",
     "stock_minimo": 5
   }
 ]

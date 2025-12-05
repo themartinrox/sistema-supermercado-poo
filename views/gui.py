@@ -474,6 +474,18 @@ class SupermercadoGUI:
         combo_unidad.pack(side=tk.LEFT, fill=tk.X, expand=True)
         combo_unidad.set("gramos")  # Valor por defecto cambiado a gramos
         entries['unidad'] = combo_unidad
+
+        # Evento para cambiar unidades según categoría
+        def on_categoria_change(event):
+            cat = combo_categoria.get()
+            if cat == "Bebidas":
+                combo_unidad['values'] = ["unidades", "gramos", "mL"]
+            else:
+                combo_unidad['values'] = ["unidades", "gramos"]
+                if combo_unidad.get() == "mL":
+                    combo_unidad.set("gramos")
+        
+        combo_categoria.bind("<<ComboboxSelected>>", on_categoria_change)
         
         # Stock Mínimo
         row_frame = ttk.Frame(campos_frame)
@@ -491,26 +503,33 @@ class SupermercadoGUI:
                 
                 nombre = entries['nombre'].get().strip()
                 categoria = entries['categoria'].get().strip()
-                unidad = entries['unidad'].get().strip().lower()
+                unidad = entries['unidad'].get().strip() # No usar lower() para mantener 'mL'
                 
                 if not nombre or not categoria:
                     messagebox.showwarning("Error", "Todos los campos de texto son obligatorios")
                     return
 
-                # Validación de nombre alfabético
-                if not nombre.replace(' ', '').isalpha():
-                    messagebox.showwarning("Error", "El nombre del producto solo puede contener letras.")
+                # Validación de nombre (Permitir letras, números, espacios y caracteres comunes)
+                # Se permite alfanumérico para casos como "Coca Cola 3L" o "Arroz 1kg"
+                caracteres_validos = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-%")
+                if not set(nombre).issubset(caracteres_validos):
+                    messagebox.showwarning("Error", "El nombre contiene caracteres no válidos.\nUse letras, números, espacios, puntos, guiones o %.")
                     return
+                
+                # Validación lógica: Debe contener al menos una letra (evita "123" o "---")
+                if not any(c.isalpha() for c in nombre):
+                     messagebox.showwarning("Error", "El nombre del producto debe contener al menos una letra.")
+                     return
 
-                if unidad not in ['unidades', 'gramos']:
-                    messagebox.showwarning("Error", "La unidad debe ser 'unidades' o 'gramos'")
+                if unidad not in ['unidades', 'gramos', 'mL']:
+                    messagebox.showwarning("Error", "La unidad debe ser 'unidades', 'gramos' o 'mL'")
                     return
 
                 precio = int(entries['precio'].get())
                 if precio < 0:
                     raise ValueError("El precio no puede ser negativo")
 
-                # Enforzar enteros para el stock (Gramos y Unidades se manejan en enteros)
+                # Enforzar enteros para el stock (Gramos, Unidades y mL se manejan en enteros)
                 try:
                     stock = int(float(entries['stock'].get()))
                 except ValueError:
