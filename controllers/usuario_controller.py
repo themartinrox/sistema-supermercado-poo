@@ -15,8 +15,11 @@ class UsuarioController:
     """
     
     def __init__(self, archivo_usuarios: str = 'data/usuarios.json'):
+        # Ruta del archivo donde se almacenan los usuarios
         self.archivo_usuarios = archivo_usuarios
+        # Diccionario en memoria para acceso rápido por username
         self.usuarios: Dict[str, Usuario] = {}
+        # Carga inicial
         self.cargar_usuarios()
 
     def cargar_usuarios(self):
@@ -25,10 +28,12 @@ class UsuarioController:
             try:
                 with open(self.archivo_usuarios, 'r', encoding='utf-8') as f:
                     usuarios_data = json.load(f)
+                # Convierte los datos JSON a objetos Usuario
                 self.usuarios = {u['username']: Usuario.from_dict(u) for u in usuarios_data}
                 print(f"Usuarios cargados: {len(self.usuarios)}")
             except Exception as e:
                 print(f"Error al cargar usuarios: {e}")
+                # Si falla, asegura que al menos exista el admin
                 self._crear_usuarios_ejemplo()
         else:
             print("No se encontró archivo de usuarios. Creando usuario admin.")
@@ -37,6 +42,10 @@ class UsuarioController:
     def guardar_usuarios(self):
         """Persiste los usuarios en el archivo JSON."""
         try:
+            # Asegurar que el directorio existe
+            os.makedirs(os.path.dirname(self.archivo_usuarios), exist_ok=True)
+            
+            # Serializa todos los usuarios
             usuarios_list = [u.to_dict() for u in self.usuarios.values()]
             with open(self.archivo_usuarios, 'w', encoding='utf-8') as f:
                 json.dump(usuarios_list, f, indent=2, ensure_ascii=False)
@@ -46,6 +55,7 @@ class UsuarioController:
     def _crear_usuarios_ejemplo(self):
         """Genera un usuario administrador por defecto si no existe."""
         if "admin" not in self.usuarios:
+            # Crea un superusuario por defecto para el primer acceso
             admin = Usuario("admin", "admin123", "admin")
             self.usuarios[admin.username] = admin
             self.guardar_usuarios()
@@ -53,7 +63,7 @@ class UsuarioController:
 
     def registrar_usuario(self, username, password, role='comprador') -> bool:
         """Registra un nuevo usuario."""
-        # Validaciones
+        # Validaciones de formato de nombre de usuario
         if ' ' in username:
             raise ValueError("El nombre de usuario no puede contener espacios.")
         
@@ -63,9 +73,11 @@ class UsuarioController:
         if set(username) == {'-'}:
              raise ValueError("El usuario no puede ser solo guiones.")
 
+        # Verifica duplicados
         if username in self.usuarios:
             return False
         
+        # Crea y guarda el nuevo usuario
         nuevo_usuario = Usuario(username, password, role)
         self.usuarios[username] = nuevo_usuario
         self.guardar_usuarios()
@@ -76,7 +88,9 @@ class UsuarioController:
         Valida las credenciales de un usuario.
         Retorna el objeto Usuario si es correcto, None en caso contrario.
         """
+        # Busca el usuario
         usuario = self.usuarios.get(username)
+        # Verifica si existe y si la contraseña coincide
         if usuario and usuario.password == password:
             return usuario
         return None

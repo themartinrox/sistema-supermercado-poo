@@ -5,23 +5,8 @@
     "role": "admin"
   },
   {
-    "username": "rox",
-    "password": "rox",
-    "role": "comprador"
-  },
-  {
-    "username": "penemaestro",
-    "password": "pedrosoto",
-    "role": "admin"
-  },
-  {
-    "username": "sexo",
-    "password": " ",
-    "role": "comprador"
-  },
-  {
-    "username": "a",
-    "password": "a",
-    "role": "comprador"
+    "username": "user1",
+    "password": "user123",
+    "role": "user"
   }
 ]

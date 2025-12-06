@@ -26,9 +26,12 @@ class Usuario:
             role (str, opcional): Tipo de usuario según sus privilegios.
                                   Por defecto se asigna 'comprador'.
         """
+        # Asigna el nombre de usuario
         self.username = username
+        # Asigna la contraseña (en un sistema real debería estar hasheada)
         self.password = password
-        self.role = role  # Puede tomar valores como 'admin' o 'comprador'
+        # Asigna el rol que define los permisos ('admin' o 'comprador')
+        self.role = role
 
     def to_dict(self) -> dict:
         """
@@ -48,20 +51,26 @@ class Usuario:
     @staticmethod
     def from_dict(data: dict):
         """
-        Genera una instancia de Usuario a partir de un diccionario previamente
-        obtenido desde una fuente externa, como un archivo JSON o una base de datos.
+        Método estático que crea una instancia de Usuario a partir de un diccionario.
+        Útil para reconstruir objetos al leer desde un archivo JSON.
 
         Args:
-            data (dict): Diccionario que contiene los valores necesarios para
-                         reconstruir un usuario. Se espera que incluya al menos
-                         'username' y 'password'. Si no contiene 'role', se
-                         asignará 'comprador' por defecto.
+            data (dict): Diccionario con las claves 'username', 'password' y 'role'.
 
         Returns:
-            Usuario: Nueva instancia creada con los datos proporcionados.
+            Usuario: Nueva instancia de la clase Usuario.
         """
         return Usuario(
             data['username'],
             data['password'],
-            data.get('role', 'comprador')
+            data.get('role', 'comprador') # Si no existe el rol, asigna 'comprador' por defecto
         )
+
+    def es_admin(self) -> bool:
+        """
+        Verifica si el usuario tiene privilegios de administrador.
+
+        Returns:
+            bool: True si el rol es 'admin', False en caso contrario.
+        """
+        return self.role == 'admin'

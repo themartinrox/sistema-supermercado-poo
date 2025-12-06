@@ -17,9 +17,13 @@ class VentaController:
     """
     
     def __init__(self, producto_controller: ProductoController, archivo_ventas: str = 'data/ventas.json'):
+        # Ruta del archivo de persistencia de ventas
         self.archivo_ventas = archivo_ventas
-        self.producto_controller = producto_controller # Dependencia para validar stock
+        # Inyección de dependencia: Necesitamos el controlador de productos para validar y descontar stock
+        self.producto_controller = producto_controller 
+        # Lista en memoria para almacenar el historial de ventas
         self.ventas: List[dict] = []
+        # Carga inicial
         self.cargar_ventas()
 
     def cargar_ventas(self):
@@ -40,6 +44,9 @@ class VentaController:
     def guardar_ventas(self):
         """Guarda el historial de ventas actualizado en el archivo JSON."""
         try:
+            # Asegurar que el directorio existe
+            os.makedirs(os.path.dirname(self.archivo_ventas), exist_ok=True)
+            
             with open(self.archivo_ventas, 'w', encoding='utf-8') as f:
                 json.dump(self.ventas, f, indent=2, ensure_ascii=False)
         except Exception as e:
@@ -54,7 +61,6 @@ class VentaController:
             return 1
         
         # Buscar el ID máximo actual. Asumimos que las ventas tienen 'id'.
-        # Si hay ventas antiguas sin ID, las ignoramos o asumimos 0.
         max_id = 0
         for v in self.ventas:
             v_id = v.get('id')
@@ -70,26 +76,41 @@ class VentaController:
         3. Registra la venta.
         items: lista de tuplas (codigo_producto, cantidad)
         """
-        # Generar ID único para la venta
+        # 1. Agrupar items y validar cantidades (por si el mismo producto aparece varias veces)
+        items_agrupados = {}
+        for codigo, cantidad in items:
+            if cantidad <= 0:
+                print(f"Error: Cantidad inválida ({cantidad}) para producto {codigo}")
+                return None
+            items_agrupados[codigo] = items_agrupados.get(codigo, 0) + cantidad
+
+        # 2. Validar stock total requerido antes de procesar nada (Atomicidad)
+        # Si falta stock de UN solo producto, la venta completa falla.
+        for codigo, cantidad_total in items_agrupados.items():
+            producto = self.producto_controller.productos.get(codigo)
+            if not producto:
+                print(f"Error: Producto {codigo} no encontrado.")
+                return None
+            if producto.stock < cantidad_total:
+                print(f"Stock insuficiente para {producto.nombre}. Requerido: {cantidad_total}, Disponible: {producto.stock}")
+                return None
+        
+        # 3. Generar ID y Objeto Venta
         nuevo_id = self.obtener_siguiente_id()
         venta = Venta(id_venta=nuevo_id)
         
-        # Validar stock antes de procesar (Transaccionalidad básica)
-        for codigo, cantidad in items:
-            producto = self.producto_controller.productos.get(codigo)
-            if not producto or producto.stock < cantidad:
-                print(f"Stock insuficiente para {producto.nombre if producto else 'producto desconocido'}.")
-                return None
-        
-        # Procesar la venta (Descontar stock y agregar items)
-        for codigo, cantidad in items:
+        # 4. Procesar la venta (Descontar stock y agregar items)
+        for codigo, cantidad_total in items_agrupados.items():
             producto = self.producto_controller.productos[codigo]
-            venta.agregar_item(producto, cantidad)
-            self.producto_controller.actualizar_stock(codigo, cantidad, 'restar')
+            # Descuenta el stock usando el controlador de productos
+            self.producto_controller.actualizar_stock(codigo, cantidad_total, operacion='restar')
+            # Agrega el item al registro de la venta
+            venta.agregar_item(producto, cantidad_total)
         
+        # 5. Guardar la venta en el historial
         self.ventas.append(venta.to_dict())
         self.guardar_ventas()
-        
+        print(f"Venta #{venta.id} realizada con éxito. Total: ${venta.total}")
         return venta
 
     def obtener_estadisticas(self) -> dict:
