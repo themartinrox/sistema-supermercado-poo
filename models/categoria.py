@@ -38,9 +38,3 @@ class Categoria:
     def __str__(self):
         # Retorna el nombre de la categoría como representación en string
         return self.nombre
-        if isinstance(data, str):
-            return Categoria(data)
-        return Categoria(data['nombre'], data.get('descripcion', ''))
-
-    def __str__(self):
-        return self.nombre

@@ -5,7 +5,7 @@ Returns:
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog, simpledialog
 from models import Producto, Usuario
 from controllers.supermercado_controller import SupermercadoController
 
@@ -20,6 +20,7 @@ class SupermercadoGUI:
         self.usuario = usuario
         self.controller = controller
         self.on_logout = on_logout
+        self.dark_mode = False # Estado del tema
         
         # Configuración de la ventana principal
         self.root.title(f"Supermercado - {self.usuario.username} ({self.usuario.role})")
@@ -40,6 +41,10 @@ class SupermercadoGUI:
         # Evento para actualizar datos al cambiar de pestaña
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
+    def _crear_boton(self, parent, text, command, side=tk.RIGHT, padx=5):
+        """Helper para crear botones estandarizados."""
+        ttk.Button(parent, text=text, command=command).pack(side=side, padx=padx)
+
     def _setup_header(self):
         """Configura el encabezado con el título y botones de sesión."""
         frame_header = ttk.Frame(self.main_container)
@@ -47,12 +52,86 @@ class SupermercadoGUI:
         
         # Título dinámico según el rol
         titulo_texto = "Supermercado Manager" if self.usuario.role == 'admin' else "Supermercado - Compras"
-        lbl_titulo = ttk.Label(frame_header, text=titulo_texto, font=('Helvetica', 18, 'bold'))
-        lbl_titulo.pack(side=tk.LEFT, pady=(0, 10))
+        self.lbl_titulo = ttk.Label(frame_header, text=titulo_texto, font=('Helvetica', 18, 'bold'))
+        self.lbl_titulo.pack(side=tk.LEFT, pady=(0, 10))
 
         # Botones de acción global
-        ttk.Button(frame_header, text="Cerrar Sesión", command=self.cerrar_sesion).pack(side=tk.RIGHT)
-        ttk.Button(frame_header, text="Recargar Datos", command=self.recargar_datos).pack(side=tk.RIGHT, padx=5)
+        botones = [
+            ("Cerrar Sesión", self.cerrar_sesion),
+            ("Recargar Datos", self.recargar_datos),
+            ("Cambiar Clave", self.mostrar_cambiar_clave),
+            ("Modo Oscuro", self.toggle_theme)
+        ]
+        for texto, comando in botones:
+            self._crear_boton(frame_header, texto, comando)
+
+    def toggle_theme(self):
+        """Alterna entre modo claro y oscuro."""
+        self.dark_mode = not self.dark_mode
+        
+        # Configuración de colores según el modo
+        colors = {
+            True: {"bg": "#2d2d2d", "fg": "#ffffff", "field": "#404040"},
+            False: {"bg": "#f0f0f0", "fg": "black", "field": "white"}
+        }
+        c = colors[self.dark_mode]
+        
+        if not self.dark_mode:
+            self.style.theme_use('clam')
+            
+        self.style.configure(".", background=c["bg"], foreground=c["fg"], fieldbackground=c["field"])
+        self.style.configure("Treeview", background=c["field"], foreground=c["fg"], fieldbackground=c["field"])
+        
+        if self.dark_mode:
+            self.style.map("Treeview", background=[('selected', '#0078d7')])
+            
+        self.root.configure(bg=c["bg"])
+        self.lbl_titulo.configure(background=c["bg"], foreground=c["fg"])
+
+    def cerrar_sesion(self):
+        """Cierra la sesión actual."""
+        if messagebox.askyesno("Cerrar Sesión", "¿Está seguro que desea salir?"):
+            self.on_logout()
+
+    def recargar_datos(self):
+        """Recarga los datos desde los archivos JSON."""
+        self.controller.cargar_datos()
+        if self.usuario.role == 'admin':
+            self.cargar_inventario_admin()
+        self.cargar_productos_venta()
+        messagebox.showinfo("Datos", "Datos recargados correctamente.")
+
+    def on_tab_change(self, event):
+        """Actualiza los datos de la pestaña seleccionada."""
+        # Evitar errores si el notebook no está listo
+        if not hasattr(self, 'notebook'): return
+        
+        try:
+            tab_id = self.notebook.select()
+            tab_text = self.notebook.tab(tab_id, "text")
+            
+            if tab_text in ["Inventario", "Catálogo"]:
+                self.cargar_inventario_admin()
+            elif tab_text in ["Ventas", "Comprar"]:
+                self.cargar_productos_venta()
+            elif tab_text == "Reportes":
+                self.actualizar_reportes()
+            elif tab_text == "Alertas":
+                self.cargar_alertas()
+        except Exception:
+            pass
+
+    def mostrar_cambiar_clave(self):
+        """Diálogo para cambiar contraseña."""
+        old = simpledialog.askstring("Cambiar Clave", "Contraseña Actual:", show='*')
+        if not old: return
+        new = simpledialog.askstring("Cambiar Clave", "Nueva Contraseña:", show='*')
+        if not new: return
+        
+        if self.controller.cambiar_password(self.usuario.username, old, new):
+            messagebox.showinfo("Éxito", "Contraseña actualizada correctamente.")
+        else:
+            messagebox.showerror("Error", "Contraseña actual incorrecta.")
 
     def _setup_notebook(self):
         """Configura las pestañas (tabs) según el rol del usuario."""
@@ -85,37 +164,7 @@ class SupermercadoGUI:
             self.notebook.add(self.tab_inventario, text="Catálogo")
             
             self.init_ventas()
-            self.init_inventario_comprador()
-
-    def recargar_datos(self):
-        """Fuerza una recarga de datos desde los archivos JSON."""
-        if messagebox.askyesno("Confirmar", "Recargar datos desde el archivo?"):
-            self.controller.cargar_datos()
-            self.on_tab_change() # Refresca la pestaña actual
-            messagebox.showinfo("Éxito", "Datos actualizados.")
-
-    def cerrar_sesion(self):
-        """Ejecuta el callback de logout."""
-        self.on_logout()
-
-    def on_tab_change(self, event=None):
-        """Manejador de evento de cambio de pestaña. Actualiza los datos visibles."""
-        selected_tab_index = self.notebook.index(self.notebook.select())
-        tab_text = self.notebook.tab(selected_tab_index, "text")
-        
-        # Lógica de actualización selectiva según la pestaña activa
-        if "Inventario" in tab_text or "Catálogo" in tab_text:
-            if self.usuario.role == 'admin':
-                self.cargar_inventario_admin()
-            else:
-                self.cargar_inventario_comprador()
-        elif "Reportes" in tab_text:
-            self.actualizar_reportes()
-        elif "Alertas" in tab_text:
-            self.cargar_alertas()
-        elif "Ventas" in tab_text or "Comprar" in tab_text:
-            self.cargar_productos_venta()
-
+            self.init_catalogo_comprador()
     # --- Pestaña de Inventario (Admin) ---
     def init_inventario_admin(self):
         """Inicializa la pestaña de inventario para administradores."""
@@ -124,17 +173,55 @@ class SupermercadoGUI:
         self.frame_controles.pack(fill=tk.X, pady=5)
         
         # Botones de gestión de inventario
-        ttk.Button(self.frame_controles, text="Nuevo Producto", command=self.mostrar_dialogo_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(self.frame_controles, text="Actualizar Stock", command=self.mostrar_dialogo_stock).pack(side=tk.LEFT, padx=5)
-        ttk.Button(self.frame_controles, text="Eliminar Producto", command=self.eliminar_producto).pack(side=tk.LEFT, padx=5)
-        ttk.Button(self.frame_controles, text="Reiniciar Productos", command=self.reiniciar_productos).pack(side=tk.LEFT, padx=5)
-        ttk.Button(self.frame_controles, text="Crear Admin", command=self.mostrar_dialogo_crear_admin).pack(side=tk.LEFT, padx=5)
+        botones = [
+            ("Nuevo Producto", self.mostrar_dialogo_producto),
+            ("Actualizar Stock", self.mostrar_dialogo_stock),
+            ("Eliminar Producto", self.eliminar_producto),
+            ("Reiniciar Productos", self.reiniciar_productos),
+            ("Crear Admin", self.mostrar_dialogo_crear_admin),
+            ("Exportar CSV", self.exportar_csv)
+        ]
+        for texto, comando in botones:
+            self._crear_boton(self.frame_controles, texto, comando, side=tk.LEFT)
         
         # Campo de búsqueda en tiempo real
         ttk.Label(self.frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
         self.entry_buscar_inv = ttk.Entry(self.frame_controles)
         self.entry_buscar_inv.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         # Vincula el evento de soltar tecla para filtrar automáticamente
+        self.entry_buscar_inv.bind('<KeyRelease>', lambda e: self.cargar_inventario_admin())
+        
+        # Configuración de la tabla (Treeview)
+        columns = ('codigo', 'nombre', 'precio', 'stock', 'unidad', 'categoria', 'estado')
+        self.tree_inv = ttk.Treeview(self.tab_inventario, columns=columns, show='headings')
+        
+        # Configura encabezados
+        for col in columns:
+            self.tree_inv.heading(col, text=col.capitalize())
+        
+        self.tree_inv.pack(fill=tk.BOTH, expand=True)
+        # Carga inicial de datos
+        self.cargar_inventario_admin()
+
+    def exportar_csv(self):
+        """Exporta el inventario a CSV."""
+        filename = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
+        if filename:
+            if self.controller.exportar_inventario_csv(filename):
+                messagebox.showinfo("Éxito", "Inventario exportado correctamente.")
+            else:
+                messagebox.showerror("Error", "No se pudo exportar el archivo.")
+
+    def init_catalogo_comprador(self):
+        """Inicializa la pestaña de catálogo para compradores (solo lectura)."""
+        # Frame para búsqueda
+        self.frame_controles = ttk.Frame(self.tab_inventario)
+        self.frame_controles.pack(fill=tk.X, pady=5)
+        
+        # Campo de búsqueda en tiempo real
+        ttk.Label(self.frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=(20, 5))
+        self.entry_buscar_inv = ttk.Entry(self.frame_controles)
+        self.entry_buscar_inv.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         self.entry_buscar_inv.bind('<KeyRelease>', lambda e: self.cargar_inventario_admin())
         
         # Configuración de la tabla (Treeview)
@@ -170,50 +257,14 @@ class SupermercadoGUI:
                 stock_display = f"{p.stock:.1f}"
             else:
                 stock_display = f"{int(p.stock)}"
-                
-            # Inserta la fila en la tabla
-            self.tree_inv.insert('', tk.END, iid=p.codigo, values=(
-                p.codigo, p.nombre, f"${p.precio:,.0f}", stock_display, p.unidad, p.categoria, estado
-            ))
-
-    # --- Pestaña de Inventario (Comprador) ---
-    def init_inventario_comprador(self):
-        """Inicializa la vista de catálogo para compradores."""
-        # Búsqueda
-        frame_controles = ttk.Frame(self.tab_inventario)
-        frame_controles.pack(fill=tk.X, pady=5)
-        ttk.Label(frame_controles, text="Buscar:").pack(side=tk.LEFT, padx=5)
-        self.entry_buscar_cat = ttk.Entry(frame_controles)
-        self.entry_buscar_cat.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
-        self.entry_buscar_cat.bind('<KeyRelease>', lambda e: self.cargar_inventario_comprador())
-
-        # Tabla de catálogo (simplificada para el cliente)
-        columns = ('nombre', 'precio', 'stock', 'categoria')
-        self.tree_cat = ttk.Treeview(self.tab_inventario, columns=columns, show='headings')
-        for col in columns:
-            self.tree_cat.heading(col, text=col.capitalize())
-        self.tree_cat.pack(fill=tk.BOTH, expand=True)
-        self.cargar_inventario_comprador()
-
-    def cargar_inventario_comprador(self):
-        """Carga los productos en el catálogo del comprador."""
-        for item in self.tree_cat.get_children():
-            self.tree_cat.delete(item)
             
-        termino = self.entry_buscar_cat.get()
-        productos = self.controller.buscar_producto(termino) if termino else self.controller.productos.values()
-
-        for p in sorted(productos, key=lambda x: x.nombre):
-            # Formatear stock según unidad para visualización amigable
-            if p.unidad == 'kg':
-                stock_display = f"{p.stock:.1f} {p.unidad}"
-            else:
-                stock_display = f"{int(p.stock)} {p.unidad}"
-
-            self.tree_cat.insert('', tk.END, values=(
-                p.nombre, f"${p.precio:,.0f}", stock_display, p.categoria
+            self.tree_inv.insert('', tk.END, iid=p.codigo, values=(
+                p.codigo, p.nombre, f"${p.precio:,.0f}", stock_display, 
+                p.unidad.nombre if hasattr(p.unidad, 'nombre') else p.unidad, 
+                p.categoria.nombre if hasattr(p.categoria, 'nombre') else p.categoria, 
+                estado
             ))
-
+                
     # --- Pestaña de Ventas ---
     def init_ventas(self):
         """Inicializa la interfaz de ventas (POS)."""
@@ -223,9 +274,15 @@ class SupermercadoGUI:
         
         # Panel de productos disponibles
         frame_prod = ttk.Labelframe(paned, text="Productos Disponibles")
-        self.entry_buscar_venta = ttk.Entry(frame_prod)
-        self.entry_buscar_venta.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Búsqueda con soporte para "Código de Barras" (Enter)
+        frame_search = ttk.Frame(frame_prod)
+        frame_search.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Label(frame_search, text="Buscar / Escanear:").pack(side=tk.LEFT)
+        self.entry_buscar_venta = ttk.Entry(frame_search)
+        self.entry_buscar_venta.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         self.entry_buscar_venta.bind('<KeyRelease>', lambda e: self.cargar_productos_venta())
+        self.entry_buscar_venta.bind('<Return>', self.procesar_codigo_barras) # Simulación Scanner
         
         cols_prod = ('nombre', 'precio', 'stock')
         self.tree_venta_prod = ttk.Treeview(frame_prod, columns=cols_prod, show='headings', height=10)
@@ -259,58 +316,119 @@ class SupermercadoGUI:
         self.carrito_items = {} # Diccionario para almacenar items del carrito {codigo: cantidad}
         self.cargar_productos_venta()
 
+    def procesar_codigo_barras(self, event):
+        """Si el texto ingresado coincide exactamente con un código, agrega 1 unidad."""
+        codigo = self.entry_buscar_venta.get().strip()
+        if codigo in self.controller.productos:
+            # Simular selección y agregar
+            self.carrito_items[codigo] = self.carrito_items.get(codigo, 0) + 1
+            self.actualizar_carrito_y_total()
+            self.entry_buscar_venta.delete(0, tk.END) # Limpiar para siguiente escaneo
+            messagebox.showinfo("Scanner", f"Producto {codigo} agregado.")
+        else:
+            # Si no es código exacto, no hace nada (ya filtra por nombre)
+            pass
+
+
+
+
     def cargar_productos_venta(self):
-        """Carga los productos disponibles para la venta (stock > 0)."""
-        # Limpia la lista de productos
+        """Carga los productos disponibles en la tabla de ventas."""
         for item in self.tree_venta_prod.get_children():
             self.tree_venta_prod.delete(item)
-        
-        # Filtra productos disponibles
+            
         termino = self.entry_buscar_venta.get()
         productos = self.controller.buscar_producto(termino) if termino else self.controller.obtener_productos_disponibles()
         
         for p in sorted(productos, key=lambda x: x.nombre):
-            if p.stock > 0:
-                # Formatear stock según unidad
-                if p.unidad == 'kg':
-                    stock_display = f"{p.stock:.1f}"
-                else:
-                    stock_display = f"{int(p.stock)}"
-                self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", stock_display))
+            self.tree_venta_prod.insert('', tk.END, iid=p.codigo, values=(p.nombre, f"${p.precio:,.0f}", p.stock))
 
     def agregar_al_carrito(self):
-        """Agrega el producto seleccionado al carrito de compras."""
+        """Agrega el producto seleccionado al carrito."""
         selected = self.tree_venta_prod.selection()
         if not selected: return
-        codigo = selected[0]
         
+        codigo = selected[0]
         try:
-            # Obtiene la cantidad ingresada
             cantidad_val = float(self.entry_cant_venta.get())
-            producto = self.controller.productos[codigo]
-            
             if cantidad_val <= 0: raise ValueError("Cantidad debe ser positiva.")
             
-            # Validación específica por tipo de unidad
+            producto = self.controller.productos[codigo]
+            
             if producto.unidad == 'kg':
-                # Para kg permitimos 1 decimal
                 cantidad = round(cantidad_val, 1)
             else:
-                # Para unidades discretas, debe ser entero
                 if not cantidad_val.is_integer():
                     raise ValueError(f"Producto se vende en {producto.unidad} enteras.")
                 cantidad = int(cantidad_val)
-
-            # Verifica stock disponible
+                
             if cantidad > producto.stock:
                 raise ValueError(f"Stock insuficiente. Disponible: {producto.stock}")
-
-            # Actualiza la cantidad si ya existe en el carrito
+                
             self.carrito_items[codigo] = self.carrito_items.get(codigo, 0) + cantidad
             self.actualizar_carrito_y_total()
-
+            
         except ValueError as e:
             messagebox.showerror("Error", str(e))
+
+    def actualizar_carrito_y_total(self):
+        """Refresca la vista del carrito y recalcula el total."""
+        # Limpia la tabla del carrito
+        for item in self.tree_cart.get_children():
+            self.tree_cart.delete(item)
+        
+        total = 0
+        # Recorre los items en el carrito para calcular subtotales
+        for codigo, cantidad in self.carrito_items.items():
+            producto = self.controller.productos[codigo]
+            subtotal = producto.precio * cantidad
+            total += subtotal
+            
+            # Formato de cantidad según unidad
+            if producto.unidad == 'kg':
+                cant_display = f"{cantidad:.1f}"
+            else:
+                cant_display = f"{int(cantidad)}"
+                
+            self.tree_cart.insert('', tk.END, values=(producto.nombre, cant_display, f"${subtotal:,.0f}"))
+        
+        # Aplicar descuento visual
+        try:
+            desc = float(self.entry_descuento.get())
+            if desc < 0 or desc > 100: desc = 0
+        except ValueError:
+            desc = 0
+            
+        total_final = total * (1 - (desc/100))
+        self.lbl_total.config(text=f"TOTAL: ${total_final:,.0f} (Desc: {desc}%)")
+
+    def limpiar_carrito(self):
+        """Vacía el carrito de compras."""
+        self.carrito_items.clear()
+        self.actualizar_carrito_y_total()
+
+    def finalizar_venta(self):
+        """Procesa la venta final, actualizando stock y guardando registro."""
+        if not self.carrito_items: return
+        
+        items_venta = list(self.carrito_items.items())
+        try:
+            descuento = float(self.entry_descuento.get())
+            if descuento < 0 or descuento > 100: raise ValueError
+        except ValueError:
+            descuento = 0.0
+
+        # Confirmación de usuario
+        if messagebox.askyesno("Confirmar", f"Proceder con la venta por {self.lbl_total['text']}?"):
+            # Llama al controlador para procesar la transacción
+            venta = self.controller.realizar_venta(items_venta, descuento)
+            if venta:
+                messagebox.showinfo("Éxito", f"Venta realizada! ID: {venta.id}\nTotal: ${venta.total:,.0f}\nBoleta generada en carpeta del proyecto.")
+                # Limpia y actualiza la vista
+                self.limpiar_carrito()
+                self.cargar_productos_venta()
+            else:
+                messagebox.showerror("Error", "No se pudo procesar la venta. Verifique el stock.")
 
     def actualizar_carrito_y_total(self):
         """Refresca la vista del carrito y recalcula el total."""
@@ -592,6 +710,22 @@ class SupermercadoGUI:
         entry_stock_minimo.pack(side=tk.LEFT, fill=tk.X, expand=True)
         entry_stock_minimo.insert(0, "5")
         entries['stock_minimo'] = entry_stock_minimo
+
+        # Imagen (Path)
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Imagen:", width=25).pack(side=tk.LEFT)
+        entry_imagen = ttk.Entry(row_frame)
+        entry_imagen.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['imagen'] = entry_imagen
+        
+        def seleccionar_imagen():
+            filename = filedialog.askopenfilename(filetypes=[("Images", "*.png;*.jpg;*.jpeg")])
+            if filename:
+                entry_imagen.delete(0, tk.END)
+                entry_imagen.insert(0, filename)
+        
+        ttk.Button(row_frame, text="...", width=3, command=seleccionar_imagen).pack(side=tk.LEFT, padx=5)
         
         def guardar():
             try:
@@ -601,6 +735,7 @@ class SupermercadoGUI:
                 nombre = entries['nombre'].get().strip()
                 categoria = entries['categoria'].get().strip()
                 unidad = entries['unidad'].get().strip() # No usar lower() para mantener 'mL'
+                imagen_path = entries['imagen'].get().strip()
                 
                 if not nombre or not categoria:
                     messagebox.showwarning("Error", "Todos los campos de texto son obligatorios")
@@ -652,7 +787,7 @@ class SupermercadoGUI:
                 if stock_min < 0:
                     raise ValueError("El stock mínimo no puede ser negativo")
 
-                p = Producto(codigo, nombre, precio, stock, categoria, unidad, stock_min)
+                p = Producto(codigo, nombre, precio, stock, categoria, unidad, stock_min, imagen_path)
                 
                 if self.controller.agregar_producto(p):
                     messagebox.showinfo("Éxito", "Producto agregado correctamente")

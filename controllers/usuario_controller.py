@@ -94,3 +94,12 @@ class UsuarioController:
         if usuario and usuario.password == password:
             return usuario
         return None
+
+    def cambiar_password(self, username, old_pass, new_pass) -> bool:
+        """Cambia la contraseña de un usuario."""
+        usuario = self.usuarios.get(username)
+        if usuario and usuario.password == old_pass:
+            usuario.password = new_pass
+            self.guardar_usuarios()
+            return True
+        return False

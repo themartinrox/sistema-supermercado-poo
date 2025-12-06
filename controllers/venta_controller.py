@@ -68,13 +68,14 @@ class VentaController:
                 max_id = v_id
         return max_id + 1
 
-    def realizar_venta(self, items: List[tuple]) -> Optional[Venta]:
+    def realizar_venta(self, items: List[tuple], descuento: float = 0.0) -> Optional[Venta]:
         """
         Procesa una nueva venta.
         1. Valida stock suficiente para todos los items.
         2. Descuenta stock.
         3. Registra la venta.
         items: lista de tuplas (codigo_producto, cantidad)
+        descuento: porcentaje de descuento (0-100)
         """
         # 1. Agrupar items y validar cantidades (por si el mismo producto aparece varias veces)
         items_agrupados = {}
@@ -107,6 +108,13 @@ class VentaController:
             # Agrega el item al registro de la venta
             venta.agregar_item(producto, cantidad_total)
         
+        # Aplicar descuento si existe
+        if descuento > 0:
+            venta.descuento = descuento
+            # Aplicar descuento al total
+            descuento_monto = venta.total * (descuento / 100)
+            venta.total -= descuento_monto
+
         # 5. Guardar la venta en el historial
         self.ventas.append(venta.to_dict())
         self.guardar_ventas()

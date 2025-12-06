@@ -24,6 +24,8 @@ class Venta:
         self.fecha = datetime.now()
         # Acumulador del monto total de la venta
         self.total = 0.0
+        # Descuento aplicado (porcentaje o monto fijo, aquí asumiremos porcentaje por simplicidad en la vista)
+        self.descuento = 0.0
     
     def agregar_item(self, producto: Producto, cantidad: float):
         """
@@ -55,7 +57,8 @@ class Venta:
             # Convertimos la fecha a string para poder guardarla en JSON
             'fecha': self.fecha.strftime('%Y-%m-%d %H:%M:%S'),
             'items': self.items,
-            'total': self.total
+            'total': self.total,
+            'descuento': self.descuento
         }
     
     @staticmethod
@@ -68,10 +71,5 @@ class Venta:
         # Restaura los items y el total
         venta.items = data['items']
         venta.total = data['total']
-        return venta
-        """Reconstruye una venta desde un diccionario almacenado."""
-        venta = Venta(data.get('id'))
-        venta.fecha = datetime.strptime(data['fecha'], '%Y-%m-%d %H:%M:%S')
-        venta.items = data['items']
-        venta.total = data['total']
+        venta.descuento = data.get('descuento', 0.0)
         return venta

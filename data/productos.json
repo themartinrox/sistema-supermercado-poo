@@ -3,10 +3,11 @@
     "codigo": "1",
     "nombre": "Arroz",
     "precio": 1500,
-    "stock": 50.0,
+    "stock": 5.0,
     "categoria": "Abarrotes",
     "unidad": "kg",
-    "stock_minimo": 10.0
+    "stock_minimo": 10.0,
+    "imagen_path": null
   },
   {
     "codigo": "2",
@@ -15,7 +16,8 @@
     "stock": 30,
     "categoria": "Lácteos",
     "unidad": "unidades",
-    "stock_minimo": 5
+    "stock_minimo": 5,
+    "imagen_path": null
   },
   {
     "codigo": "3",
@@ -24,7 +26,8 @@
     "stock": 100,
     "categoria": "Panadería",
     "unidad": "unidades",
-    "stock_minimo": 20
+    "stock_minimo": 20,
+    "imagen_path": null
   },
   {
     "codigo": "4",
@@ -33,7 +36,8 @@
     "stock": 20.5,
     "categoria": "Frutas",
     "unidad": "kg",
-    "stock_minimo": 5.0
+    "stock_minimo": 5.0,
+    "imagen_path": null
   },
   {
     "codigo": "5",
@@ -42,6 +46,7 @@
     "stock": 15.0,
     "categoria": "Carnes",
     "unidad": "kg",
-    "stock_minimo": 5.0
+    "stock_minimo": 5.0,
+    "imagen_path": null
   }
 ]

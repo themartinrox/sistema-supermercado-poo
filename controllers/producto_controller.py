@@ -6,6 +6,7 @@ Returns:
 
 import os
 import json
+import csv
 from typing import Dict, List
 from models.producto import Producto
 from models.categoria import Categoria
@@ -170,7 +171,6 @@ class ProductoController:
         producto = self.productos[codigo]
         del self.productos[codigo]
         self.guardar_productos()
-        return True
         print(f"Producto '{producto.nombre}' eliminado exitosamente")
         return True
 
@@ -182,4 +182,27 @@ class ProductoController:
             return True
         except Exception as e:
             print(f"Error al reiniciar productos: {e}")
+            return False
+
+    def exportar_a_csv(self, ruta_archivo: str) -> bool:
+        """Exporta el inventario actual a un archivo CSV."""
+        try:
+            with open(ruta_archivo, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                # Encabezados
+                writer.writerow(['Codigo', 'Nombre', 'Precio', 'Stock', 'Unidad', 'Categoria', 'Stock Minimo'])
+                # Datos
+                for p in self.productos.values():
+                    writer.writerow([
+                        p.codigo, 
+                        p.nombre, 
+                        p.precio, 
+                        p.stock, 
+                        p.unidad.nombre, 
+                        p.categoria.nombre, 
+                        p.stock_minimo
+                    ])
+            return True
+        except Exception as e:
+            print(f"Error al exportar CSV: {e}")
             return False

@@ -13,7 +13,7 @@ class Producto:
     Utiliza composición con las clases Categoria y Unidad.
     """
     def __init__(self, codigo: str, nombre: str, precio: float, stock: float, 
-                 categoria: Categoria, unidad: Unidad, stock_minimo: float = 5):
+                 categoria: Categoria, unidad: Unidad, stock_minimo: float = 5, imagen_path: str = None):
         # Identificador único del producto
         self.codigo = codigo
         # Nombre descriptivo del producto
@@ -28,6 +28,8 @@ class Producto:
         self.unidad = unidad
         # Cantidad mínima antes de generar alerta de reabastecimiento
         self.stock_minimo = stock_minimo
+        # Ruta de la imagen del producto
+        self.imagen_path = imagen_path
     
     def to_dict(self) -> dict:
         """Convierte el objeto producto a un diccionario serializable para JSON."""
@@ -40,7 +42,8 @@ class Producto:
             # Si son objetos, extraemos el nombre; si ya son strings, los usamos directamente
             'categoria': self.categoria.nombre if isinstance(self.categoria, Categoria) else self.categoria,
             'unidad': self.unidad.nombre if isinstance(self.unidad, Unidad) else self.unidad,
-            'stock_minimo': self.stock_minimo
+            'stock_minimo': self.stock_minimo,
+            'imagen_path': self.imagen_path
         }
     
     @staticmethod
@@ -75,7 +78,8 @@ class Producto:
             stock,
             categoria_obj,
             unidad_obj,
-            stock_minimo
+            stock_minimo,
+            data.get('imagen_path')
         )
     
     def tiene_stock_bajo(self) -> bool:

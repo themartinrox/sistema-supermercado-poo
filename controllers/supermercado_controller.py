@@ -81,6 +81,9 @@ class SupermercadoController:
         if hasattr(self.producto_controller, 'reiniciar_productos'):
             return self.producto_controller.reiniciar_productos()
 
+    def exportar_inventario_csv(self, ruta):
+        return self.producto_controller.exportar_a_csv(ruta)
+
     # Métodos de Usuario (Delegación)
     def registrar_usuario(self, username, password, role='comprador'):
         return self.usuario_controller.registrar_usuario(username, password, role)
@@ -88,9 +91,12 @@ class SupermercadoController:
     def autenticar_usuario(self, username, password):
         return self.usuario_controller.autenticar_usuario(username, password)
 
+    def cambiar_password(self, username, old_pass, new_pass):
+        return self.usuario_controller.cambiar_password(username, old_pass, new_pass)
+
     # Métodos de Venta (Delegación)
-    def realizar_venta(self, items):
-        return self.venta_controller.realizar_venta(items)
+    def realizar_venta(self, items, descuento=0.0):
+        return self.venta_controller.realizar_venta(items, descuento)
 
     def obtener_estadisticas(self):
         # Si el controlador de ventas tiene estadísticas, las retorna
