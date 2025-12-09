@@ -86,21 +86,3 @@ if __name__ == "__main__":
     app = Application(root)
     # Inicia el bucle de eventos de la interfaz gráfica
     root.mainloop()
-
-    def on_logout(self):
-        """Callback para cerrar sesión y volver al login."""
-        self._clear_widgets()
-        self.show_login_window()
-
-    def _clear_widgets(self):
-        """Elimina todos los widgets de la ventana actual para cambiar de vista."""
-        for widget in self.root.winfo_children():
-            widget.destroy()
-
-def main():
-    root = tk.Tk()
-    app = Application(root)
-    root.mainloop()
-
-if __name__ == "__main__":
-    main()
