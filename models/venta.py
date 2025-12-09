@@ -3,7 +3,6 @@ Modelo que representa una venta realizada.
 Contiene la información de la transacción, incluyendo items, fecha y total.
 """
 from datetime import datetime
-from typing import List, Optional
 from .producto import Producto
 
 class Venta:
