@@ -6,8 +6,8 @@
     "stock": 30,
     "categoria": "Lácteos",
     "unidad": "unidades",
-    "stock_minimo": 5,
-    "imagen_path": null
+    "stock_minimo": 5.0,
+    "imagen_path": "C:/Users/TheMa/Downloads/pain.jpg"
   },
   {
     "codigo": "3",

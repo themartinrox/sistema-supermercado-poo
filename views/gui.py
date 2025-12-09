@@ -6,7 +6,7 @@ Returns:
 
 import tkinter as tk
 import os
-from tkinter import ttk, messagebox, filedialog, simpledialog
+from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
 from models import Producto, Usuario
 from controllers.supermercado_controller import SupermercadoController
@@ -788,6 +788,7 @@ class SupermercadoGUI:
         ttk.Button(row_frame, text="...", width=3, command=seleccionar_imagen).pack(side=tk.LEFT, padx=5)
         
         def guardar():
+            """Valida los datos y guarda el nuevo producto."""
             try:
                 # Generar código automáticamente al guardar
                 codigo = self.controller.producto_controller.generar_codigo()
@@ -859,6 +860,7 @@ class SupermercadoGUI:
                 messagebox.showerror("Error", f"Valores inválidos: {str(e)}")
         
         def cancelar():
+            """Cierra el formulario y restaura la vista de inventario."""
             form_frame.destroy()
             self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
@@ -912,6 +914,7 @@ class SupermercadoGUI:
         entry_cant.focus()
         
         def actualizar():
+            """Valida la cantidad y actualiza el stock del producto."""
             try:
                 # Enforzar enteros para la cantidad, excepto si es kg
                 cant_val = float(entry_cant.get())
@@ -946,6 +949,7 @@ class SupermercadoGUI:
                 messagebox.showerror("Error", "Cantidad inválida")
         
         def cancelar():
+            """Cierra el formulario de stock y restaura la vista."""
             form_frame.destroy()
             self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
@@ -1022,6 +1026,7 @@ class SupermercadoGUI:
         entries['password'] = entry_pass
         
         def guardar():
+            """Valida y crea el nuevo administrador."""
             username = entries['username'].get().strip()
             password = entries['password'].get().strip()
             
@@ -1039,6 +1044,7 @@ class SupermercadoGUI:
                 messagebox.showerror("Error de Validación", str(e))
         
         def cancelar():
+            """Cierra el formulario de admin y restaura la vista."""
             form_frame.destroy()
             self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
@@ -1197,11 +1203,13 @@ class SupermercadoGUI:
         ttk.Button(row_frame, text="...", width=3, command=seleccionar_imagen).pack(side=tk.LEFT, padx=5)
         
         def cancelar():
+            """Cierra el formulario de edición y restaura la vista."""
             form_frame.destroy()
             self.frame_controles.pack(fill=tk.X, pady=5)
             self.tree_inv.pack(fill=tk.BOTH, expand=True)
 
         def guardar_cambios():
+            """Valida y guarda los cambios realizados al producto."""
             try:
                 nombre = entries['nombre'].get().strip()
                 categoria_str = entries['categoria'].get().strip()
@@ -1242,62 +1250,83 @@ class SupermercadoGUI:
         ttk.Button(btn_frame, text="Cancelar", command=cancelar).pack(side=tk.LEFT, padx=5)
 
 class LoginWindow:
+    """
+    Ventana de inicio de sesión.
+    Permite a los usuarios ingresar sus credenciales o navegar al registro.
+    """
     def __init__(self, root, controller: SupermercadoController, on_login_success, on_show_registro):
         self.root = root
         self.controller = controller
         self.on_login_success = on_login_success
         self.on_show_registro = on_show_registro
         
+        # Frame principal con padding
         self.frame = ttk.Frame(root, padding="20")
         self.frame.pack(fill=tk.BOTH, expand=True)
         
+        # Título
         ttk.Label(self.frame, text="Iniciar Sesión", font=('Helvetica', 16, 'bold')).pack(pady=20)
         
+        # Campo Usuario
         ttk.Label(self.frame, text="Usuario:").pack(anchor=tk.W)
         self.entry_user = ttk.Entry(self.frame)
         self.entry_user.pack(fill=tk.X, pady=5)
         
+        # Campo Contraseña
         ttk.Label(self.frame, text="Contraseña:").pack(anchor=tk.W)
         self.entry_pass = ttk.Entry(self.frame, show="*")
         self.entry_pass.pack(fill=tk.X, pady=5)
         
+        # Botones de acción
         ttk.Button(self.frame, text="Ingresar", command=self.login).pack(fill=tk.X, pady=20)
         ttk.Button(self.frame, text="Crear cuenta de Comprador", command=self.mostrar_registro).pack(fill=tk.X)
 
     def login(self):
+        """Valida las credenciales ingresadas y procede al login si son correctas."""
         user = self.entry_user.get()
         pwd = self.entry_pass.get()
+        # Llama al controlador para verificar usuario
         usuario = self.controller.autenticar_usuario(user, pwd)
         
         if usuario:
+            # Si es correcto, destruye esta vista y llama al callback de éxito
             self.frame.destroy()
             self.on_login_success(usuario)
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
 
     def mostrar_registro(self):
+        """Navega a la pantalla de registro."""
         self.on_show_registro()
 
 class RegistroWindow:
+    """
+    Ventana de registro para nuevos usuarios (Compradores).
+    """
     def __init__(self, root, controller: SupermercadoController, on_volver_login, on_registro_exitoso):
         self.root = root
         self.controller = controller
         self.on_volver_login = on_volver_login
         self.on_registro_exitoso = on_registro_exitoso
         
+        # Frame principal
         self.frame = ttk.Frame(root, padding="20")
         self.frame.pack(fill=tk.BOTH, expand=True)
         
+        # Título
         ttk.Label(self.frame, text="Nuevo Usuario", font=('Helvetica', 14, 'bold')).pack(pady=20)
         
+        # Campo Usuario
         ttk.Label(self.frame, text="Usuario:").pack(anchor=tk.W)
         self.entry_user = ttk.Entry(self.frame)
         self.entry_user.pack(fill=tk.X, pady=5)
         
+        # Campo Contraseña
         ttk.Label(self.frame, text="Contraseña:").pack(anchor=tk.W)
         self.entry_pass = ttk.Entry(self.frame, show="*")
         self.entry_pass.pack(fill=tk.X, pady=5)
         
+        # Botones
         btn_frame = ttk.Frame(self.frame)
         btn_frame.pack(fill=tk.X, pady=20)
         
@@ -1305,10 +1334,12 @@ class RegistroWindow:
         ttk.Button(btn_frame, text="Volver", command=self.volver).pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0))
 
     def volver(self):
+        """Cancela el registro y vuelve al login."""
         self.frame.destroy()
         self.on_volver_login()
 
     def registrar(self):
+        """Intenta registrar un nuevo usuario con los datos ingresados."""
         user = self.entry_user.get()
         pwd = self.entry_pass.get()
         
@@ -1317,6 +1348,7 @@ class RegistroWindow:
             return
             
         try:
+            # Intenta registrar como comprador
             if self.controller.registrar_usuario(user, pwd, 'comprador'):
                 messagebox.showinfo("Éxito", "Usuario registrado. Ahora puede iniciar sesión.")
                 self.frame.destroy()
