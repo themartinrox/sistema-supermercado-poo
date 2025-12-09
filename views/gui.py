@@ -124,16 +124,67 @@ class SupermercadoGUI:
             pass
 
     def mostrar_cambiar_clave(self):
-        """Diálogo para cambiar contraseña."""
-        old = simpledialog.askstring("Cambiar Clave", "Contraseña Actual:", show='*')
-        if not old: return
-        new = simpledialog.askstring("Cambiar Clave", "Nueva Contraseña:", show='*')
-        if not new: return
+        """Muestra el formulario de cambio de contraseña en el contenedor principal."""
+        # Si ya existe el frame, no hacer nada
+        if hasattr(self, 'frame_clave') and self.frame_clave.winfo_exists():
+            return
+
+        # Ocultar el notebook (contenido principal)
+        self.notebook.pack_forget()
         
-        if self.controller.cambiar_password(self.usuario.username, old, new):
-            messagebox.showinfo("Éxito", "Contraseña actualizada correctamente.")
-        else:
-            messagebox.showerror("Error", "Contraseña actual incorrecta.")
+        # Crear frame para el formulario
+        self.frame_clave = ttk.Frame(self.main_container)
+        self.frame_clave.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Título
+        ttk.Label(self.frame_clave, text="Cambiar Contraseña", font=('Helvetica', 16, 'bold')).pack(pady=20)
+        
+        # Contenedor centrado
+        center_frame = ttk.Frame(self.frame_clave)
+        center_frame.pack(expand=True)
+        
+        # Campos
+        ttk.Label(center_frame, text="Contraseña Actual:").pack(anchor=tk.W, pady=(10, 5))
+        entry_old = ttk.Entry(center_frame, show="*", width=30)
+        entry_old.pack(pady=5)
+        
+        ttk.Label(center_frame, text="Nueva Contraseña:").pack(anchor=tk.W, pady=(10, 5))
+        entry_new = ttk.Entry(center_frame, show="*", width=30)
+        entry_new.pack(pady=5)
+        
+        ttk.Label(center_frame, text="Confirmar Nueva Contraseña:").pack(anchor=tk.W, pady=(10, 5))
+        entry_confirm = ttk.Entry(center_frame, show="*", width=30)
+        entry_confirm.pack(pady=5)
+        
+        def cerrar():
+            self.frame_clave.destroy()
+            self.notebook.pack(fill=tk.BOTH, expand=True)
+            
+        def guardar():
+            old = entry_old.get()
+            new = entry_new.get()
+            confirm = entry_confirm.get()
+            
+            if not old or not new:
+                messagebox.showwarning("Aviso", "Complete todos los campos")
+                return
+                
+            if new != confirm:
+                messagebox.showerror("Error", "Las nuevas contraseñas no coinciden")
+                return
+                
+            if self.controller.cambiar_password(self.usuario.username, old, new):
+                messagebox.showinfo("Éxito", "Contraseña actualizada correctamente.")
+                cerrar()
+            else:
+                messagebox.showerror("Error", "Contraseña actual incorrecta.")
+        
+        # Botones
+        btn_frame = ttk.Frame(center_frame)
+        btn_frame.pack(pady=30, fill=tk.X)
+        
+        ttk.Button(btn_frame, text="Guardar", command=guardar).pack(side=tk.LEFT, expand=True, padx=5)
+        ttk.Button(btn_frame, text="Cancelar", command=cerrar).pack(side=tk.RIGHT, expand=True, padx=5)
 
     def _setup_notebook(self):
         """Configura las pestañas (tabs) según el rol del usuario."""
