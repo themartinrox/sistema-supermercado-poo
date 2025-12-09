@@ -6,7 +6,9 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 
 ### Gestión de Inventario
 - **Ver inventario completo** organizado por categorías
-- **Agregar nuevos productos** con toda su información
+- **Agregar nuevos productos** con toda su información, incluyendo **imágenes**
+- **Editar productos** existentes (precio, stock, nombre, imagen, etc.)
+- **Soporte para unidades de medida**: Kilogramos (con decimales) y Unidades (enteros)
 - **Actualizar stock** (agregar o reducir cantidades)
 - **Eliminar productos** del inventario
 - **Reiniciar productos** a valores por defecto (sin afectar ventas/usuarios)
@@ -21,6 +23,10 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 - **Actualización automática** del inventario tras cada venta
 - **Registro histórico** de todas las ventas realizadas
 - **Generación de Boleta** con ID único de venta
+
+### Roles de Usuario
+- **Administrador**: Acceso total a inventario, reportes, alertas y gestión de usuarios.
+- **Comprador**: Acceso restringido a catálogo de compra y carrito.
 
 ### Reportes y Estadísticas
 - Total de productos en catálogo
@@ -47,12 +53,17 @@ Sistema completo de gestión para supermercados desarrollado en Python. Permite 
 ### Requisitos
 - Python 3.7 o superior
 - Librería `tkinter` (incluida en la instalación estándar de Python)
+- Librería `Pillow` (para manejo de imágenes)
 
-### Ejecución
-**Interfaz Gráfica (Recomendada):**
-```bash
-python main.py
-```
+### Instalación y Ejecución
+1. Instalar dependencias:
+   ```bash
+   pip install Pillow
+   ```
+2. Ejecutar la aplicación:
+   ```bash
+   python main.py
+   ```
 
 El sistema cargará automáticamente los 3 archivos JSON (productos, ventas, usuarios) desde la carpeta `data/` o los creará con datos de ejemplo si no existen.
 

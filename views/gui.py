@@ -5,7 +5,9 @@ Returns:
 """
 
 import tkinter as tk
+import os
 from tkinter import ttk, messagebox, filedialog, simpledialog
+from PIL import Image, ImageTk
 from models import Producto, Usuario
 from controllers.supermercado_controller import SupermercadoController
 
@@ -175,6 +177,7 @@ class SupermercadoGUI:
         # Botones de gestión de inventario
         botones = [
             ("Nuevo Producto", self.mostrar_dialogo_producto),
+            ("Editar Producto", self.mostrar_dialogo_editar_producto),
             ("Actualizar Stock", self.mostrar_dialogo_stock),
             ("Eliminar Producto", self.eliminar_producto),
             ("Reiniciar Productos", self.reiniciar_productos),
@@ -199,6 +202,9 @@ class SupermercadoGUI:
         for col in columns:
             self.tree_inv.heading(col, text=col.capitalize())
         
+        # Vincula doble click para ver detalles e imagen
+        self.tree_inv.bind("<Double-1>", self.mostrar_detalle_producto)
+
         self.tree_inv.pack(fill=tk.BOTH, expand=True)
         # Carga inicial de datos
         self.cargar_inventario_admin()
@@ -231,6 +237,9 @@ class SupermercadoGUI:
         # Configura encabezados
         for col in columns:
             self.tree_inv.heading(col, text=col.capitalize())
+        
+        # Vincula doble click para ver detalles e imagen
+        self.tree_inv.bind("<Double-1>", self.mostrar_detalle_producto)
         
         self.tree_inv.pack(fill=tk.BOTH, expand=True)
         # Carga inicial de datos
@@ -987,6 +996,198 @@ class SupermercadoGUI:
         btn_frame = ttk.Frame(form_frame)
         btn_frame.pack(fill=tk.X, pady=20)
         ttk.Button(btn_frame, text="Crear Admin", command=guardar).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Cancelar", command=cancelar).pack(side=tk.LEFT, padx=5)
+
+    def mostrar_detalle_producto(self, event):
+        """Muestra una ventana con el detalle del producto y su imagen."""
+        selected = self.tree_inv.selection()
+        if not selected: return
+        
+        codigo = selected[0]
+        producto = self.controller.productos.get(codigo)
+        if not producto: return
+        
+        detalle = tk.Toplevel(self.root)
+        detalle.title(f"Detalle: {producto.nombre}")
+        detalle.geometry("400x550")
+        
+        # Imagen
+        if producto.imagen_path and os.path.exists(producto.imagen_path):
+            try:
+                img = Image.open(producto.imagen_path)
+                # Redimensionar manteniendo aspecto
+                img.thumbnail((300, 300), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                lbl_img = ttk.Label(detalle, image=photo)
+                lbl_img.image = photo # Mantener referencia
+                lbl_img.pack(pady=10)
+            except Exception as e:
+                ttk.Label(detalle, text=f"Error al cargar imagen: {e}").pack(pady=10)
+        else:
+            ttk.Label(detalle, text="Sin Imagen Disponible", font=('Helvetica', 10, 'italic')).pack(pady=50)
+            
+        # Detalles
+        info_frame = ttk.Frame(detalle)
+        info_frame.pack(fill=tk.BOTH, expand=True, padx=20)
+        
+        ttk.Label(info_frame, text=f"Producto: {producto.nombre}", font=('Helvetica', 16, 'bold')).pack(pady=5)
+        ttk.Label(info_frame, text=f"Código: {producto.codigo}", font=('Helvetica', 10)).pack()
+        ttk.Label(info_frame, text=f"Precio: ${producto.precio:,.0f}", font=('Helvetica', 12, 'bold'), foreground='green').pack(pady=5)
+        
+        if producto.unidad == 'kg':
+            stock_str = f"{producto.stock:.1f} kg"
+        else:
+            stock_str = f"{int(producto.stock)} unidades"
+            
+        ttk.Label(info_frame, text=f"Stock Disponible: {stock_str}").pack()
+        
+        cat_nombre = producto.categoria.nombre if hasattr(producto.categoria, 'nombre') else str(producto.categoria)
+        ttk.Label(info_frame, text=f"Categoría: {cat_nombre}").pack()
+        
+        ttk.Button(detalle, text="Cerrar", command=detalle.destroy).pack(pady=20)
+
+    def mostrar_dialogo_editar_producto(self):
+        """Muestra formulario para editar un producto existente."""
+        selected = self.tree_inv.selection()
+        if not selected:
+            messagebox.showwarning("Aviso", "Seleccione un producto para editar")
+            return
+            
+        codigo = selected[0]
+        producto = self.controller.productos.get(codigo)
+        if not producto: return
+
+        # Ocultar la tabla y controles temporalmente
+        self.tree_inv.pack_forget()
+        self.frame_controles.pack_forget()
+        
+        # Crear frame para el formulario
+        form_frame = ttk.Frame(self.tab_inventario)
+        form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        ttk.Label(form_frame, text=f"Editar Producto: {producto.nombre}", font=('Helvetica', 14, 'bold')).pack(pady=10)
+        
+        campos_frame = ttk.Frame(form_frame)
+        campos_frame.pack(fill=tk.BOTH, expand=True)
+        
+        entries = {}
+        
+        # Nombre
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Nombre:", width=25).pack(side=tk.LEFT)
+        entry_nombre = ttk.Entry(row_frame)
+        entry_nombre.insert(0, producto.nombre)
+        entry_nombre.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['nombre'] = entry_nombre
+        
+        # Precio
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Precio (CLP):", width=25).pack(side=tk.LEFT)
+        entry_precio = ttk.Entry(row_frame)
+        entry_precio.insert(0, str(int(producto.precio)))
+        entry_precio.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['precio'] = entry_precio
+        
+        # Categoría
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Categoría:", width=25).pack(side=tk.LEFT)
+        combo_categoria = ttk.Combobox(row_frame, state='readonly', values=[
+            "Abarrotes", "Lácteos", "Panadería", "Frutas", "Verduras", 
+            "Carnes", "Bebidas", "Limpieza", "Snacks", "Congelados"
+        ])
+        cat_nombre = producto.categoria.nombre if hasattr(producto.categoria, 'nombre') else str(producto.categoria)
+        combo_categoria.set(cat_nombre)
+        combo_categoria.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['categoria'] = combo_categoria
+        
+        # Unidad
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Unidad:", width=25).pack(side=tk.LEFT)
+        combo_unidad = ttk.Combobox(row_frame, state='readonly', values=["unidades", "kg", "mL"])
+        unidad_nombre = producto.unidad.nombre if hasattr(producto.unidad, 'nombre') else str(producto.unidad)
+        
+        # Normalizar unidad para el combo
+        if 'kg' in str(unidad_nombre).lower(): combo_unidad.set('kg')
+        elif 'ml' in str(unidad_nombre).lower(): combo_unidad.set('mL')
+        else: combo_unidad.set('unidades')
+        
+        combo_unidad.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['unidad'] = combo_unidad
+
+        # Stock Mínimo
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Stock Mínimo:", width=25).pack(side=tk.LEFT)
+        entry_stock_minimo = ttk.Entry(row_frame)
+        entry_stock_minimo.insert(0, str(producto.stock_minimo))
+        entry_stock_minimo.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['stock_minimo'] = entry_stock_minimo
+
+        # Imagen
+        row_frame = ttk.Frame(campos_frame)
+        row_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(row_frame, text="Imagen:", width=25).pack(side=tk.LEFT)
+        entry_imagen = ttk.Entry(row_frame)
+        if producto.imagen_path:
+            entry_imagen.insert(0, producto.imagen_path)
+        entry_imagen.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        entries['imagen'] = entry_imagen
+        
+        def seleccionar_imagen():
+            filename = filedialog.askopenfilename(filetypes=[("Images", "*.png;*.jpg;*.jpeg")])
+            if filename:
+                entry_imagen.delete(0, tk.END)
+                entry_imagen.insert(0, filename)
+        
+        ttk.Button(row_frame, text="...", width=3, command=seleccionar_imagen).pack(side=tk.LEFT, padx=5)
+        
+        def cancelar():
+            form_frame.destroy()
+            self.frame_controles.pack(fill=tk.X, pady=5)
+            self.tree_inv.pack(fill=tk.BOTH, expand=True)
+
+        def guardar_cambios():
+            try:
+                nombre = entries['nombre'].get().strip()
+                categoria_str = entries['categoria'].get().strip()
+                unidad_str = entries['unidad'].get().strip()
+                imagen_path = entries['imagen'].get().strip()
+                
+                if not nombre: raise ValueError("El nombre es obligatorio")
+                
+                precio = int(entries['precio'].get())
+                stock_min = float(entries['stock_minimo'].get())
+                
+                # Actualizar objeto
+                from models.categoria import Categoria
+                from models.unidad import Unidad
+                
+                producto.nombre = nombre
+                producto.precio = precio
+                producto.categoria = Categoria(categoria_str)
+                producto.unidad = Unidad(unidad_str)
+                producto.stock_minimo = stock_min
+                producto.imagen_path = imagen_path
+                
+                # Llamar al controlador
+                if self.controller.producto_controller.actualizar_producto(producto):
+                    messagebox.showinfo("Éxito", "Producto actualizado")
+                    cancelar()
+                    self.cargar_inventario_admin()
+                else:
+                    messagebox.showerror("Error", "No se pudo actualizar")
+                    
+            except ValueError as e:
+                messagebox.showerror("Error", str(e))
+
+        # Botones
+        btn_frame = ttk.Frame(form_frame)
+        btn_frame.pack(fill=tk.X, pady=20)
+        ttk.Button(btn_frame, text="Guardar Cambios", command=guardar_cambios).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Cancelar", command=cancelar).pack(side=tk.LEFT, padx=5)
 
 class LoginWindow:

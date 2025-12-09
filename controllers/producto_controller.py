@@ -142,6 +142,22 @@ class ProductoController:
         self.guardar_productos()
         return True
 
+    def actualizar_producto(self, producto: Producto) -> bool:
+        """
+        Actualiza la información de un producto existente.
+        Reemplaza el objeto producto en el diccionario y guarda los cambios.
+        """
+        if producto.codigo not in self.productos:
+            print(f"Error: No se puede actualizar. Producto {producto.codigo} no existe.")
+            return False
+            
+        # Actualiza el producto en memoria
+        self.productos[producto.codigo] = producto
+        # Persiste los cambios
+        self.guardar_productos()
+        print(f"Producto {producto.codigo} actualizado correctamente.")
+        return True
+
     def buscar_producto(self, termino: str) -> List[Producto]:
         """Filtra productos por coincidencia parcial en código, nombre o categoría."""
         termino = termino.lower()

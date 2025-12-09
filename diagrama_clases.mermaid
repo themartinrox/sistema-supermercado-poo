@@ -1,0 +1,79 @@
+classDiagram
+    class SupermercadoController {
+        +productos: Dict
+        +usuarios: Dict
+        +ventas: List
+        +usuario_actual: Usuario
+        +login(user, pass)
+        +logout()
+        +agregar_producto(producto)
+        +registrar_venta(venta)
+    }
+
+    class ProductoController {
+        +productos: Dict
+        +cargar_productos()
+        +guardar_productos()
+        +agregar_producto(producto)
+        +actualizar_producto(producto)
+        +actualizar_stock(codigo, cantidad)
+        +buscar_producto(termino)
+    }
+
+    class UsuarioController {
+        +usuarios: Dict
+        +autenticar(user, pass)
+        +registrar(user, pass, rol)
+    }
+
+    class VentaController {
+        +ventas: List
+        +realizar_venta(items)
+        +obtener_estadisticas()
+    }
+
+    class Producto {
+        +codigo: str
+        +nombre: str
+        +precio: float
+        +stock: float
+        +categoria: Categoria
+        +unidad: Unidad
+        +stock_minimo: float
+        +imagen_path: str
+        +tiene_stock_bajo()
+    }
+
+    class Venta {
+        +id: str
+        +fecha: str
+        +items: List
+        +total: int
+        +agregar_item(producto, cantidad)
+    }
+
+    class Usuario {
+        +username: str
+        +password: str
+        +rol: str
+        +es_admin()
+    }
+
+    class SupermercadoGUI {
+        +root: Tk
+        +controller: SupermercadoController
+        +init_login()
+        +init_admin_dashboard()
+        +init_comprador_dashboard()
+        +mostrar_detalle_producto()
+        +mostrar_dialogo_editar_producto()
+    }
+
+    SupermercadoController --> ProductoController
+    SupermercadoController --> UsuarioController
+    SupermercadoController --> VentaController
+    SupermercadoGUI --> SupermercadoController
+    ProductoController --> Producto
+    VentaController --> Venta
+    UsuarioController --> Usuario
+    Venta --> Producto : contiene

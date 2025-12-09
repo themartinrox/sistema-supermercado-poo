@@ -1,15 +1,5 @@
 [
   {
-    "codigo": "1",
-    "nombre": "Arroz",
-    "precio": 1500,
-    "stock": 5.0,
-    "categoria": "Abarrotes",
-    "unidad": "kg",
-    "stock_minimo": 10.0,
-    "imagen_path": null
-  },
-  {
     "codigo": "2",
     "nombre": "Leche",
     "precio": 1200,
@@ -48,5 +38,15 @@
     "unidad": "kg",
     "stock_minimo": 5.0,
     "imagen_path": null
+  },
+  {
+    "codigo": "6",
+    "nombre": "Arroz",
+    "precio": 1500,
+    "stock": 10.0,
+    "categoria": "Abarrotes",
+    "unidad": "kg",
+    "stock_minimo": 5.0,
+    "imagen_path": "C:/Users/TheMa/Downloads/arroz.jpg"
   }
 ]

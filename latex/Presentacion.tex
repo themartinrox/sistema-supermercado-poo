@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{booktabs}
 
 % Configuración de listings para código Python
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -20,7 +21,7 @@
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\tiny,
     breakatwhitespace=false,         
     breaklines=true,                 
     captionpos=b,                    
@@ -35,10 +36,10 @@
 
 \lstset{style=mystyle, language=Python}
 
-\title{Sistema de Gestión de Minimarket}
-\subtitle{Proyecto de Programación Orientada a Objetos}
-\author{Martin Rodriguez \and Juan Aguilar \and Ignacio Iturra \and Diego Dominguez}
-\institute{Universidad de Los Lagos}
+\title{Sistema de administración}
+\subtitle{Funcionalidades}
+\author{Martin Rodriguez}
+\institute{Programación Orientada a Objetos}
 \date{\today}
 
 \begin{document}
@@ -48,202 +49,168 @@
     \titlepage
 \end{frame}
 
-% Índice
-\begin{frame}{Contenido}
-    \tableofcontents
-\end{frame}
-
-% Sección 1: Introducción
-\section{Introducción}
-\begin{frame}{Introducción}
-    \begin{itemize}
-        \item \textbf{Contexto:} Los pequeños negocios (minimarkets) a menudo dependen de procesos manuales para el inventario y las ventas.
-        \item \textbf{Problema:} 
-            \begin{itemize}
-                \item Errores en el cálculo de stock.
-                \item Pérdidas financieras desconocidas.
-                \item Lentitud en la atención al cliente.
-            \end{itemize}
-        \item \textbf{Solución:} Un sistema de escritorio en Python que automatiza la gestión de inventario y ventas, mejorando la eficiencia y el control.
-    \end{itemize}
-\end{frame}
-
-% Sección 2: Objetivos
-\section{Objetivos}
-\begin{frame}{Objetivos del Proyecto}
-    \textbf{Objetivo General:}
-    \begin{itemize}
-        \item Desarrollar un sistema de información para administrar un minimarket, gestionando inventario y ventas de forma eficiente.
-    \end{itemize}
-    
-    \vspace{0.5cm}
-    
-    \textbf{Objetivos Específicos:}
-    \begin{itemize}
-        \item Implementar arquitectura \textbf{MVC} (Modelo-Vista-Controlador).
-        \item Diseñar una \textbf{GUI} funcional con Tkinter.
-        \item Gestionar productos con \textbf{Categorías} y \textbf{Unidades}.
-        \item Implementar persistencia de datos con archivos \textbf{JSON}.
-        \item Generar reportes de ventas con IDs únicos.
-    \end{itemize}
-\end{frame}
-
-% Sección 3: Fundamentación Técnica
-\section{Fundamentación Técnica}
-\begin{frame}{Tecnologías y Patrones}
-    \begin{columns}
-        \column{0.5\textwidth}
-        \textbf{Tecnologías:}
-        \begin{itemize}
-            \item \textbf{Python 3.14:} Lenguaje principal.
-            \item \textbf{Tkinter:} Interfaz gráfica.
-            \item \textbf{JSON:} Persistencia de datos ligera.
-        \end{itemize}
-        
-        \column{0.5\textwidth}
-        \textbf{Patrones de Diseño:}
-        \begin{itemize}
-            \item \textbf{MVC:} Separación de lógica (Controlador), datos (Modelo) e interfaz (Vista).
-            \item \textbf{Facade:} \texttt{SupermercadoController} unifica el acceso a los sub-controladores.
-            \item \textbf{POO:} Uso de Clases, Herencia y Composición.
-        \end{itemize}
-    \end{columns}
-\end{frame}
-
-% Sección 4: Arquitectura
-\section{Arquitectura del Sistema}
+% Sección: Diagrama de Clases
+\section{Diagrama de Clases}
 \begin{frame}{Diagrama de Clases}
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth, height=0.75\textheight, keepaspectratio]{images/diagrama_clases.png}
+        \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{images/diagrama_clases.png}
         \caption{Estructura de Clases del Sistema (MVC)}
     \end{figure}
 \end{frame}
 
-\begin{frame}{Estructura del Proyecto}
-    La estructura de carpetas refleja la arquitectura MVC:
-    \vspace{0.5cm}
-    \begin{itemize}
-        \item \texttt{models/}: Definición de objetos (\texttt{Producto}, \texttt{Venta}, \texttt{Usuario}).
-        \item \texttt{views/}: Interfaz gráfica (\texttt{SupermercadoGUI}).
-        \item \texttt{controllers/}: Lógica de negocio (\texttt{VentaController}, \texttt{ProductoController}).
-        \item \texttt{data/}: Archivos de persistencia (\texttt{.json}).
-    \end{itemize}
-\end{frame}
-
-% Sección 5: Implementación (Código)
+% Sección: Algoritmos Actualizados
 \section{Implementación y Algoritmos}
 
-\begin{frame}[fragile]{Modelo: Producto (Composición)}
-    Uso de composición para \texttt{Categoria} y \texttt{Unidad}.
+\begin{frame}[fragile]{Modelo: Producto (Soporte Multimedia)}
+    La clase \texttt{Producto} ahora integra rutas de imágenes y objetos de Unidad.
     \begin{lstlisting}
 class Producto:
+    # Constructor de la clase Producto
     def __init__(self, codigo, nombre, precio, stock, 
-                 categoria: Categoria, unidad: Unidad, ...):
-        self.codigo = codigo
-        self.nombre = nombre
-        self.precio = precio
-        self.stock = stock
-        self.categoria = categoria # Objeto Categoria
-        self.unidad = unidad       # Objeto Unidad
-    
-    def to_dict(self) -> dict:
-        return {
-            'codigo': self.codigo,
-            # ...
-            'categoria': self.categoria.nombre,
-            'unidad': self.unidad.nombre
-        }
+                 categoria, unidad, stock_minimo=5, imagen_path=None):
+        self.codigo = codigo # Identificador unico del producto
+        self.nombre = nombre # Nombre descriptivo del producto
+        self.precio = precio # Precio unitario de venta
+        self.stock = stock # Cantidad disponible en inventario
+        self.categoria = categoria # Objeto Categoria asociado
+        self.unidad = unidad       # Objeto Unidad (Kg/Unid)
+        self.imagen_path = imagen_path # Ruta local del archivo de imagen
+        self.stock_minimo = stock_minimo # Umbral para alertas de stock bajo
+
+    # Metodo para verificar si el stock es critico
+    def tiene_stock_bajo(self) -> bool:
+        return self.stock <= self.stock_minimo # Retorna True si stock <= minimo
     \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Controlador: Generación de IDs}
-    Algoritmo para generar IDs autoincrementales en \texttt{VentaController}.
+\begin{frame}[fragile]{Vista: Carga de Imágenes (Pillow)}
+    Algoritmo en \texttt{SupermercadoGUI} para renderizar imágenes en ventanas emergentes.
     \begin{lstlisting}
-def obtener_siguiente_id(self) -> int:
-    """Calcula el siguiente ID basado en el historial."""
-    if not self.ventas:
-        return 1
-    max_id = 0
-    for v in self.ventas:
-        v_id = v.get('id')
-        if isinstance(v_id, int) and v_id > max_id:
-            max_id = v_id
-    return max_id + 1
+from PIL import Image, ImageTk # Importacion de libreria de imagenes
+
+# Metodo para mostrar detalles visuales del producto
+def mostrar_detalle_producto(self, event):
+    # ... obtener producto ...
+    # Verifica si existe una ruta de imagen valida
+    if producto.imagen_path and os.path.exists(producto.imagen_path):
+        try:
+            img = Image.open(producto.imagen_path) # Abre el archivo de imagen
+            # Redimensionamiento con filtro LANCZOS para alta calidad
+            img.thumbnail((300, 300), Image.Resampling.LANCZOS)
+            photo = ImageTk.PhotoImage(img) # Convierte a formato compatible con Tkinter
+            lbl_img = ttk.Label(detalle, image=photo) # Crea widget de etiqueta con imagen
+            lbl_img.image = photo # Mantiene referencia para evitar Garbage Collection
+            lbl_img.pack() # Muestra la imagen en la interfaz
+        except Exception as e:
+            print(f"Error imagen: {e}") # Manejo de errores de carga
     \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Controlador: Realizar Venta}
-    Lógica transaccional: Crear venta, descontar stock y guardar.
+\begin{frame}[fragile]{Controlador: Actualización de Stock (Polimorfismo de Datos)}
+    Manejo de tipos de datos según la unidad (float para Kg, int para Unidades).
     \begin{lstlisting}
-def realizar_venta(self, items: List[tuple]) -> Optional[Venta]:
-    nuevo_id = self.obtener_siguiente_id()
-    venta = Venta(id_venta=nuevo_id)
+# Metodo para modificar el inventario
+def actualizar_stock(self, codigo: str, cantidad: float, operacion: str):
+    producto = self.productos.get(codigo) # Busca el producto por codigo
     
-    for codigo, cantidad in items:
-        producto = self.producto_controller.productos[codigo]
-        venta.agregar_item(producto, cantidad)
-        # Actualizacion de stock en tiempo real
-        self.producto_controller.actualizar_stock(
-            codigo, cantidad, 'restar'
-        )
-    
-    self.ventas.append(venta.to_dict())
-    self.guardar_ventas()
-    return venta
+    if operacion == 'restar': # Logica para venta o reduccion
+        if producto.stock < cantidad: # Validacion de stock suficiente
+            return False # Retorna falso si no hay suficiente stock
+        producto.stock -= cantidad # Resta la cantidad del stock actual
+    elif operacion == 'agregar': # Logica para reabastecimiento
+        producto.stock += cantidad # Suma la cantidad al stock actual
+        
+    # Verificación de alertas post-operación
+    if producto.tiene_stock_bajo(): # Chequea si se cruzo el umbral minimo
+        print(f"ALERTA: Stock bajo en {producto.nombre}") # Notifica alerta
+        
+    self.guardar_productos() # Persiste los cambios en JSON
+    return True # Retorna exito
     \end{lstlisting}
 \end{frame}
 
-% Sección 6: Funcionalidades
-\section{Funcionalidades Clave}
-\begin{frame}{Funcionalidades del Sistema}
-    \begin{enumerate}
-        \item \textbf{Control de Acceso:} Login con roles (Admin/Comprador).
-        \item \textbf{Gestión de Inventario:} 
-            \begin{itemize}
-                \item CRUD de Productos.
-                \item Alertas de stock bajo.
-            \end{itemize}
-        \item \textbf{Punto de Venta (POS):}
-            \begin{itemize}
-                \item Búsqueda rápida de productos.
-                \item Cálculo automático de totales.
-                \item Generación de boleta (ID único).
-            \end{itemize}
-        \item \textbf{Administración:}
-            \begin{itemize}
-                \item Creación de nuevos administradores.
-                \item Reportes de ventas detallados.
-            \end{itemize}
-    \end{enumerate}
-\end{frame}
+% Sección: Funcionalidades Detalladas
+\section{Funcionalidades Detalladas}
 
-% Sección 7: Conclusión
-\section{Conclusión}
-\begin{frame}{Conclusiones y Trabajo Futuro}
-    \textbf{Conclusiones:}
+\begin{frame}{1. Acceso y Autenticación}
+    \textbf{Pantalla de Login:}
     \begin{itemize}
-        \item Se logró un sistema robusto y modular gracias a MVC.
-        \item La separación de controladores facilita el mantenimiento.
-        \item La interfaz gráfica es intuitiva para el usuario final.
+        \item Campo de texto: \texttt{Usuario}.
+        \item Campo de contraseña: \texttt{Contraseña} (oculta con *).
+        \item Botón \textbf{Ingresar}: Valida credenciales y redirige según rol.
+        \item Botón \textbf{Registrarse}: Abre formulario de registro.
     \end{itemize}
     
-    \vspace{0.5cm}
-    
-    \textbf{Trabajo Futuro:}
+    \textbf{Pantalla de Registro:}
     \begin{itemize}
-        \item Migración de JSON a Base de Datos SQL (SQLite/PostgreSQL).
-        \item Implementación de reportes gráficos (matplotlib).
-        \item Soporte para lector de código de barras.
+        \item Campos para nuevo usuario y contraseña.
+        \item Botón \textbf{Registrar}: Crea cuenta tipo "Comprador".
+        \item Botón \textbf{Volver}: Retorna al login.
     \end{itemize}
 \end{frame}
 
-\begin{frame}
-    \centering
-    \Huge \textbf{¡Muchas Gracias!}
+\begin{frame}{2. Panel de Inventario (Administrador) - Parte 1}
+    \textbf{Visualización y Búsqueda:}
+    \begin{itemize}
+        \item \textbf{Barra de Búsqueda:} Filtrado por nombre, código o categoría.
+        \item \textbf{Interacción:} Doble click en fila para ver \textbf{Ficha Técnica con Imagen}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{2. Panel de Inventario (Administrador) - Parte 2}
+    \textbf{Botones de Acción:}
+    \begin{itemize}
+        \item \textbf{Nuevo Producto:} Abre formulario para crear producto (Nombre, Precio, Stock, Categoría, Unidad, Stock Mínimo, Imagen).
+        \item \textbf{Editar Producto:} Modifica todos los atributos de un producto existente.
+        \item \textbf{Actualizar Stock:} Entrada rápida para sumar/restar cantidad al inventario.
+        \item \textbf{Eliminar Producto:} Borrado lógico/físico del sistema.
+        \item \textbf{Reiniciar Productos:} Restaura la base de datos a valores de fábrica.
+        \item \textbf{Crear Admin:} Permite elevar privilegios de usuarios.
+        \item \textbf{Exportar CSV:} Descarga el inventario actual a archivo Excel/CSV.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{3. Punto de Venta}
+    \textbf{Panel de Selección:}
+    \begin{itemize}
+        \item \textbf{Buscador/Scanner:} Campo para ingresar código o nombre.
+        \item \textbf{Selector de Cantidad:} Campo numérico (acepta decimales para Kg).
+        \item Botón \textbf{Agregar}: Mueve el ítem al carrito.
+    \end{itemize}
     
-    \vspace{1cm}
-    \large ¿Preguntas?
+    \textbf{Panel de Carrito:}
+    \begin{itemize}
+        \item Botón \textbf{Limpiar Carrito}: Cancela la operación actual.
+        \item Botón \textbf{Confirmar Venta}: Procesa la transacción, descuenta stock y genera ID.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{4. Reportes y Alertas}
+    \textbf{Pestaña Reportes:}
+    \begin{itemize}
+        \item \textbf{Detalle de Venta:} Doble click muestra desglose de productos vendidos.
+    \end{itemize}
+    
+    \textbf{Pestaña Alertas:}
+    \begin{itemize}
+        \item \textbf{Tabla de Riesgo:} Filtra automáticamente productos con stock $\le$ mínimo.
+        \item Botón \textbf{Actualizar}: Refresca el listado de alertas.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{5. Perfil Comprador}
+    Funcionalidades restringidas para clientes:
+    \begin{itemize}
+        \item \textbf{Pestaña Comprar:} Interfaz POS simplificada para auto-atención.
+        \item \textbf{Pestaña Catálogo:}
+            \begin{itemize}
+                \item Vista de solo lectura del inventario.
+                \item Buscador habilitado.
+                \item Visualización de imágenes (Doble click).
+                \item Sin acceso a edición ni stock interno.
+            \end{itemize}
+    \end{itemize}
 \end{frame}
 
 \end{document}
